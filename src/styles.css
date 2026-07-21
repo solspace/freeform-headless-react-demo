@@ -1,0 +1,262 @@
+:root {
+  color-scheme: light dark;
+  font-family:
+    "Segoe UI",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  --demo-bg: #f8fafc;
+  --demo-text: #0f172a;
+  --demo-muted: #64748b;
+  --demo-panel: #fff;
+  --demo-border: #cbd5e1;
+  --demo-tab-active: #0f172a;
+  --demo-loader: #64748b;
+  color: var(--demo-text);
+  background: var(--demo-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --demo-bg: #0f172a;
+    --demo-text: #e2e8f0;
+    --demo-muted: #94a3b8;
+    --demo-panel: #1e293b;
+    --demo-border: #334155;
+    --demo-tab-active: #e2e8f0;
+    --demo-loader: #94a3b8;
+  }
+}
+
+.app[data-theme="light"] {
+  color-scheme: light;
+  --demo-bg: #f8fafc;
+  --demo-text: #0f172a;
+  --demo-muted: #64748b;
+  --demo-panel: #fff;
+  --demo-border: #cbd5e1;
+  --demo-tab-active: #0f172a;
+  --demo-loader: #64748b;
+}
+
+.app[data-theme="dark"] {
+  color-scheme: dark;
+  --demo-bg: #0f172a;
+  --demo-text: #e2e8f0;
+  --demo-muted: #94a3b8;
+  --demo-panel: #1e293b;
+  --demo-border: #334155;
+  --demo-tab-active: #e2e8f0;
+  --demo-loader: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--demo-bg);
+  color: var(--demo-text);
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+  background: var(--demo-bg);
+  color: var(--demo-text);
+  min-height: 100vh;
+}
+
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+}
+
+header p {
+  margin: 0;
+  color: var(--demo-muted);
+}
+
+.scheme-toggle {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 1px solid var(--demo-border);
+  border-radius: 999px;
+  background: var(--demo-panel);
+  gap: 0.15rem;
+}
+
+.scheme-toggle__btn {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--demo-muted);
+  cursor: pointer;
+}
+
+.scheme-toggle__btn.is-active {
+  background: var(--demo-tab-active);
+  color: var(--demo-bg);
+}
+
+.panel {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  background: var(--demo-panel);
+}
+
+.panel-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.panel-help,
+.panel-meta {
+  margin: 0 0 1rem;
+  color: var(--demo-muted);
+  font-size: 0.9rem;
+}
+
+.panel-meta {
+  margin: 0.75rem 0 0;
+}
+
+.handle-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.handle-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex: 1 1 14rem;
+}
+
+.handle-form input {
+  font: inherit;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--demo-border);
+  background: inherit;
+  color: inherit;
+}
+
+.handle-form button,
+.controls button,
+.tabs button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #fff;
+  cursor: pointer;
+}
+
+.handle-form button:disabled,
+.controls button:disabled,
+.tabs button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  background: transparent;
+  color: inherit;
+  border-color: var(--demo-border);
+}
+
+.tab.is-active {
+  background: var(--demo-tab-active);
+  color: var(--demo-bg);
+  border-color: var(--demo-tab-active);
+}
+
+.status {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 0.9rem;
+}
+
+.status.is-error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.status.is-success {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+pre {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+}
+
+.headless-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.headless-form input,
+.headless-form textarea {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--demo-border);
+  background: inherit;
+  color: inherit;
+}
+
+.ff-loader {
+  color: var(--demo-loader);
+}

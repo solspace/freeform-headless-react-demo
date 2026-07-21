@@ -1,0 +1,30 @@
+{
+  "name": "@solspace/freeform-headless-react-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Example React app using published @solspace/freeform-* packages against Craft Freeform headless API",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@solspace/freeform-core": "^0.1.0",
+    "@solspace/freeform-extensions": "^0.1.0",
+    "@solspace/freeform-react": "^0.1.0",
+    "@solspace/freeform-react-theme-default": "^0.1.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "typescript": "^5.8.3",
+    "vite": "^8.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

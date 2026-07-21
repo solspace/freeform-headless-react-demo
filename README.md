@@ -147,4 +147,3 @@ The same npm packages work in Next.js. Use a Client Component and rewrite `/free
 ## License
 
 This demo is MIT. The Freeform Craft plugin is licensed separately — see [Solspace Freeform](https://docs.solspace.com/craft/freeform/).
-# freeform-headless-react-demo
