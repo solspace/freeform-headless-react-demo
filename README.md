@@ -143,7 +143,6 @@ The same packages work in Next.js. Use a Client Component and rewrite `/freeform
 | CSRF / session errors | Keep using the Vite proxy; don’t call Craft from another origin without CORS + credentials. |
 | CORS errors | Prefer the proxy, or add `http://localhost:3000` to `headless.allowedOrigins`. |
 | Captcha / file upload missing | Enable those integrations in Freeform; this demo already loads `recommendedExtensions`. |
-| pnpm “minimum release age” error | Use `npm install`, or try again later. |
 
 ## License
 
