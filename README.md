@@ -133,7 +133,7 @@ The same packages work in Next.js. Use a Client Component and rewrite `/freeform
 ## Docs
 
 - [Solspace Freeform documentation](https://docs.solspace.com/craft/freeform/) → Headless
-- Packages on [npm](https://www.npmjs.com/search?q=%40solspace%2Ffreeform)
+- Packages on [npm](https://www.npmjs.com/org/solspace)
 
 ## Troubleshooting
 
