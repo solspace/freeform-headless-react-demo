@@ -17,18 +17,37 @@ Before running this app:
 2. A Freeform form you want to display (you’ll use its **handle**, e.g. `contact`)
 3. **Node.js 20+**
 
-## 1. Enable headless Freeform (Craft)
+## 1. Enable headless Freeform (on your Craft site)
 
-Headless must be turned on in Freeform **before** this React app can load a form.
+This step is done in your **Craft CMS project**, not in this React demo repo.
 
-In `config/freeform.php` (see Freeform docs for the full options):
+Headless must be turned on in Freeform **before** this app can load a form.
+
+1. Open your Craft site project (the CMS install — e.g. a DDEV project, not this Vite app).
+2. Edit (or create) the Freeform config file at:
+
+   ```text
+   your-craft-project/config/freeform.php
+   ```
+
+   Typical locations:
+
+   | Setup | Path |
+   | --- | --- |
+   | Standard Craft | `config/freeform.php` at the Craft project root |
+   | DDEV / local | same — e.g. `~/Sites/my-site/config/freeform.php` |
+
+3. Merge a `headless` section into that file (keep any other Freeform settings you already have). See the [Freeform Headless docs](https://docs.solspace.com/craft/freeform/v5/headless/getting-started/) for the full options:
 
 ```php
+<?php
+// your-craft-project/config/freeform.php
+
 return [
     'headless' => [
         'enabled' => true,
         'forms' => [
-            'contact' => [          // ← your form handle
+            'contact' => [          // ← your Freeform form handle
                 'exposeManifest' => true,
                 'allowSubmit' => true,
             ],
@@ -39,9 +58,9 @@ return [
 
 Tips:
 
-- Replace `contact` with your real form handle.
+- Replace `contact` with the form **handle** from the Freeform control panel (Forms → your form).
 - For public forms, enable a **captcha** in Freeform.
-- Keep your Craft site running (e.g. DDEV at `https://site.ddev.site`).
+- Keep Craft running (e.g. DDEV at `https://site.ddev.site`) — you will point `CRAFT_PROXY_TARGET` at that URL in step 2.
 
 ## 2. Clone and configure this app
 
