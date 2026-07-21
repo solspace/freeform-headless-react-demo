@@ -1,6 +1,6 @@
 # Freeform Headless React Demo
 
-Public example app: **Vite + React** rendering Craft Freeform forms with Solspace’s official packages from the **[npm registry](https://www.npmjs.com/search?q=%40solspace%2Ffreeform)** (not linked from a local Freeform checkout).
+Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms in a headless Craft setup using the official npm packages:
 
 | Package | Role |
 | --- | --- |
@@ -9,7 +9,7 @@ Public example app: **Vite + React** rendering Craft Freeform forms with Solspac
 | [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, datetime, file drag & drop |
 | [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
 
-Clone this repo, connect it to your Craft site, and load any headless-enabled Freeform form by **handle**.
+Clone this repo, point it at your Craft site, and load any headless-enabled Freeform form by **handle**.
 
 ## Prerequisites
 
@@ -142,7 +142,7 @@ The same npm packages work in Next.js. Use a Client Component and rewrite `/free
 | CORS errors | Prefer the proxy, or add `http://localhost:3000` to `headless.allowedOrigins`. |
 | 404 on manifest | Wrong handle, or the form is not exposed for headless. |
 | Captcha / file upload missing | Enable those integrations in Freeform; this demo already loads `recommendedExtensions`. |
-| pnpm complains about “minimum release age” | Fresh `@solspace/freeform-*` publishes can trip pnpm’s supply-chain delay. This repo lists those packages in `pnpm-workspace.yaml` → `minimumReleaseAgeExclude` (**npm registry only** — not a local monorepo). Or use `npm install`. |
+| Install fails with pnpm “minimum release age” | Prefer `npm install`, or try again later. Fresh package publishes can be delayed by pnpm’s security policy. |
 
 ## License
 
