@@ -1,6 +1,6 @@
 # Freeform Headless React Demo
 
-Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms in a headless Craft setup using the official npm packages:
+Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms using the official npm packages:
 
 | Package | Role |
 | --- | --- |
@@ -9,15 +9,41 @@ Example **Vite + React** app that renders [Solspace Freeform](https://docs.solsp
 | [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, datetime, file drag & drop |
 | [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
 
-Clone this repo, point it at your Craft site, and load any headless-enabled Freeform form by **handle**.
+## What you need
 
-## Prerequisites
+Before running this app:
 
-1. Craft CMS with Freeform (including the headless REST API)
-2. Headless enabled for the form you want to use
-3. Node.js **20+**
+1. A **Craft CMS** site with **Freeform** installed (version that includes the headless REST API)
+2. A Freeform form you want to display (you’ll use its **handle**, e.g. `contact`)
+3. **Node.js 20+**
 
-## Quick start
+## 1. Enable headless Freeform (Craft)
+
+Headless must be turned on in Freeform **before** this React app can load a form.
+
+In `config/freeform.php` (see Freeform docs for the full options):
+
+```php
+return [
+    'headless' => [
+        'enabled' => true,
+        'forms' => [
+            'contact' => [          // ← your form handle
+                'exposeManifest' => true,
+                'allowSubmit' => true,
+            ],
+        ],
+    ],
+];
+```
+
+Tips:
+
+- Replace `contact` with your real form handle.
+- For public forms, enable a **captcha** in Freeform.
+- Keep your Craft site running (e.g. DDEV at `https://site.ddev.site`).
+
+## 2. Clone and configure this app
 
 ```bash
 git clone https://github.com/solspace/freeform-headless-react-demo.git
@@ -29,65 +55,48 @@ cp .env.example .env
 Edit `.env`:
 
 ```bash
-# Your Craft site (Vite proxies /freeform here)
+# Craft site URL (Vite proxies /freeform here)
 CRAFT_PROXY_TARGET=https://your-site.example
 
-# Default Freeform form handle
+# Form handle from Freeform (same as in step 1)
 VITE_FREEFORM_HANDLE=contact
 ```
 
-Install and run:
+| Variable | Purpose |
+| --- | --- |
+| `CRAFT_PROXY_TARGET` | Your Craft / Freeform site URL |
+| `VITE_FREEFORM_HANDLE` | Default form handle shown when the app starts |
+
+## 3. Install and run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Or with pnpm / yarn:
-
-```bash
-pnpm install && pnpm dev
-# yarn && yarn dev
-```
-
 Open [http://localhost:3000](http://localhost:3000).
 
-The app talks to Freeform on the **same origin** (`/freeform/...`). Vite proxies those requests to `CRAFT_PROXY_TARGET` so CSRF cookies work without awkward cross-origin setup.
+How it connects: the React app calls `/freeform/...` on **localhost**. Vite proxies those requests to `CRAFT_PROXY_TARGET`, so CSRF cookies work on the same origin.
+
+You can also use `pnpm` or `yarn` if you prefer.
 
 ## How to use a form in this app
 
-### 1. Enable the form in Freeform
+### Load your form
 
-In Craft / Freeform, turn on headless for your form (global + per-form). Example shape (see Freeform docs for the full config):
+1. Make sure the form is headless-enabled (step 1).
+2. In the app **Form settings**, enter the form handle → **Load form**.  
+   Or set `VITE_FREEFORM_HANDLE` in `.env` and restart `npm run dev`.
 
-```php
-// config/freeform.php
-return [
-    'headless' => [
-        'enabled' => true,
-        'forms' => [
-            'contact' => [
-                'exposeManifest' => true,
-                'allowSubmit' => true,
-            ],
-        ],
-    ],
-];
-```
+### Try the demo modes
 
-### 2. Point the demo at that handle
+| Tab | What it shows |
+| --- | --- |
+| `<Freeform />` | Full form with the default theme (easiest) |
+| `useFreeform()` | Headless hook — you own the markup |
+| Manifest JSON | Raw API response (useful for debugging) |
 
-**In the UI:** Form settings → enter the handle → **Load form**.
-
-**Or in `.env`:**
-
-```bash
-VITE_FREEFORM_HANDLE=contact
-```
-
-Restart the dev server after changing `VITE_*` variables.
-
-### 3. Copy the pattern into your own app
+### Use the same pattern in your own project
 
 ```tsx
 import { Freeform } from "@solspace/freeform-react";
@@ -105,15 +114,7 @@ export function ContactForm() {
 }
 ```
 
-Use your app’s origin as `baseUrl` when `/freeform` is proxied (or served) on the same host.
-
-## What the demo tabs show
-
-| Tab | Purpose |
-| --- | --- |
-| `<Freeform />` | Full rendered form with the default theme |
-| `useFreeform()` | Headless hook — you control the markup |
-| Manifest JSON | Raw REST manifest for debugging |
+When `/freeform` is proxied (or served) on the same host as your frontend, keep `baseUrl` as your app’s origin.
 
 ## Scripts
 
@@ -127,22 +128,22 @@ Custom port: `PORT=3001 npm run dev`
 
 ## Next.js
 
-The same npm packages work in Next.js. Use a Client Component and rewrite `/freeform` to your Craft site in `next.config.js` (same idea as this Vite proxy). See Solspace Freeform → Headless docs.
+The same packages work in Next.js. Use a Client Component and rewrite `/freeform` to your Craft site (same idea as this Vite proxy). See Solspace Freeform → **Headless** docs.
 
 ## Docs
 
 - [Solspace Freeform documentation](https://docs.solspace.com/craft/freeform/) → Headless
-- Package pages on [npm](https://www.npmjs.com/search?q=%40solspace%2Ffreeform)
+- Packages on [npm](https://www.npmjs.com/search?q=%40solspace%2Ffreeform)
 
 ## Troubleshooting
 
 | Issue | Fix |
 | --- | --- |
-| CSRF / session errors | Keep using the Vite proxy; don’t call Craft from the browser on another origin without CORS + credentials. |
+| Form won’t load / 404 | Wrong handle, or headless not enabled for that form (step 1). |
+| CSRF / session errors | Keep using the Vite proxy; don’t call Craft from another origin without CORS + credentials. |
 | CORS errors | Prefer the proxy, or add `http://localhost:3000` to `headless.allowedOrigins`. |
-| 404 on manifest | Wrong handle, or the form is not exposed for headless. |
 | Captcha / file upload missing | Enable those integrations in Freeform; this demo already loads `recommendedExtensions`. |
-| Install fails with pnpm “minimum release age” | Prefer `npm install`, or try again later. Fresh package publishes can be delayed by pnpm’s security policy. |
+| pnpm “minimum release age” error | Use `npm install`, or try again later. |
 
 ## License
 
