@@ -6,7 +6,7 @@ Example **Vite + React** app that renders [Solspace Freeform](https://docs.solsp
 | --- | --- |
 | [`@solspace/freeform-core`](https://www.npmjs.com/package/@solspace/freeform-core) | Manifest, state, submit |
 | [`@solspace/freeform-react`](https://www.npmjs.com/package/@solspace/freeform-react) | `<Freeform />` and `useFreeform()` |
-| [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop |
+| [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop, table, signature |
 | [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
 
 ## What you need
@@ -117,7 +117,7 @@ You can also use `pnpm` or `yarn` if you prefer.
 
 **Save & Continue:** if the form has Save enabled, click Save — the URL gets `?session-token=…&key=…`. Refresh or share that link to resume. See [React docs → Save & Continue Later](https://docs.solspace.com/craft/freeform/v5/headless/reactjs/#save--continue-later).
 
-**Calculation fields:** included via `recommendedExtensions`.
+**Advanced fields:** `recommendedExtensions` covers captchas, datetime, file drag & drop, calculation, **table**, and **signature**.
 
 ### Use the same pattern in your own project
 
