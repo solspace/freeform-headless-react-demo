@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@solspace/freeform-core':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       '@solspace/freeform-extensions':
-        specifier: ^0.1.0
-        version: 0.1.0(@solspace/freeform-core@0.1.0)
+        specifier: ^0.1.1
+        version: 0.1.1(@solspace/freeform-core@0.1.1)
       '@solspace/freeform-react':
-        specifier: ^0.1.0
-        version: 0.1.0(@solspace/freeform-core@0.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^0.1.1
+        version: 0.1.1(@solspace/freeform-core@0.1.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@solspace/freeform-react-theme-default':
-        specifier: ^0.1.0
-        version: 0.1.0(@solspace/freeform-react@0.1.0(@solspace/freeform-core@0.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        specifier: ^0.1.1
+        version: 0.1.1(@solspace/freeform-react@0.1.1(@solspace/freeform-core@0.1.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -164,21 +164,21 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@solspace/freeform-core@0.1.0':
-    resolution: {integrity: sha512-Lcxtxd6dqOFIHoRX5o5/i0K7wTz/e2p5PC4Ss411pnm9aBIdMd9G+RJtVImCiBhLpFCYyqKgaZfCCdZ0WseG5g==}
+  '@solspace/freeform-core@0.1.1':
+    resolution: {integrity: sha512-NtIJkVikXDm8zhDJ2C/KWbX+kAqqS854B8zQbfnHFjjsWi5rl5tiPQwNdOSmXlAewdCmoqKytSmINy/RehWGDA==}
 
-  '@solspace/freeform-extensions@0.1.0':
-    resolution: {integrity: sha512-X1HSlAX4OCyd9EyarUBy7ZRP0S62ZtB0+/JXmIj47K/HXVeZ4mirW+xlsxPHxrIPvNe/RRfHkXhHpWRTeXUEqw==}
+  '@solspace/freeform-extensions@0.1.1':
+    resolution: {integrity: sha512-lsxHp0c9MhtYEvHeXykGVSmFoLzqi3fsDLIjf848wFM2IoLp2LqPsAaG1QmL+4hFGKdXVRzINzyY2vs73IA0kQ==}
     peerDependencies:
       '@solspace/freeform-core': ^0.1.0
 
-  '@solspace/freeform-react-theme-default@0.1.0':
-    resolution: {integrity: sha512-adzczqi/GsCS9KiEYsWAowLTrf2AaBzJI+KwHx25IbdYwe8mIBcS7JCSObg26wgk3igNHIyJVLU/KWrXC+kipA==}
+  '@solspace/freeform-react-theme-default@0.1.1':
+    resolution: {integrity: sha512-ZF4zMv3SPqtzN5zKW9z+tcZtBs/vXr/newH008LRzBqsc9O0feXr7Rxz5wYLW+7+lABjTzQvBCFqfXM9cUAjQw==}
     peerDependencies:
       '@solspace/freeform-react': ^0.1.0
 
-  '@solspace/freeform-react@0.1.0':
-    resolution: {integrity: sha512-TYWo5FGiCsI39TfW7q9aeRky5Hgp6rcHr3QFCNBhcWuA+4D/Q6cBik6Dv9p3DUlzaTg1qCmNQOrsn+LrpeCQ/w==}
+  '@solspace/freeform-react@0.1.1':
+    resolution: {integrity: sha512-X0W9RZ+CqNPhF95qLLK0Nb/piB0dPY6LQhwdFUS6Kg8bJ+rrVVoyqhmgg9xbzjcY5UCr97pxQFSMSDFvHAN71Q==}
     peerDependencies:
       '@solspace/freeform-core': ^0.1.0
       react: ^18.0.0 || ^19.0.0
@@ -211,9 +211,15 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
+  dayjs@1.11.21:
+    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  expression-language@2.7.0:
+    resolution: {integrity: sha512-9iwh2dHLXf1HLIxwD/Rzts62EkqCP5+klm802f+UQcgBNOs9hhxx8MyUYu94iERZr7ief+WsRcEZQaDd63jazQ==}
 
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
@@ -302,6 +308,10 @@ packages:
   lightningcss@1.33.0:
     resolution: {integrity: sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==}
     engines: {node: '>= 12.0.0'}
+
+  locutus@3.0.36:
+    resolution: {integrity: sha512-ilsz33lqEd+KerV9JnSHM9EApVYOZ86/JTGKyafmWvhTFtjYauzT1WmZgdJ4JBGR3dY0N0PTfIq2uLvazw5QsQ==}
+    engines: {node: '>= 22', yarn: '>= 1'}
 
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
@@ -475,20 +485,23 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@solspace/freeform-core@0.1.0': {}
+  '@solspace/freeform-core@0.1.1':
+    dependencies:
+      expression-language: 2.7.0
 
-  '@solspace/freeform-extensions@0.1.0(@solspace/freeform-core@0.1.0)':
+  '@solspace/freeform-extensions@0.1.1(@solspace/freeform-core@0.1.1)':
     dependencies:
       '@friendlycaptcha/sdk': 0.1.37
-      '@solspace/freeform-core': 0.1.0
+      '@solspace/freeform-core': 0.1.1
+      expression-language: 2.7.0
 
-  '@solspace/freeform-react-theme-default@0.1.0(@solspace/freeform-react@0.1.0(@solspace/freeform-core@0.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
+  '@solspace/freeform-react-theme-default@0.1.1(@solspace/freeform-react@0.1.1(@solspace/freeform-core@0.1.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
     dependencies:
-      '@solspace/freeform-react': 0.1.0(@solspace/freeform-core@0.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@solspace/freeform-react': 0.1.1(@solspace/freeform-core@0.1.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
-  '@solspace/freeform-react@0.1.0(@solspace/freeform-core@0.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@solspace/freeform-react@0.1.1(@solspace/freeform-core@0.1.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
-      '@solspace/freeform-core': 0.1.0
+      '@solspace/freeform-core': 0.1.1
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
@@ -512,7 +525,14 @@ snapshots:
 
   csstype@3.2.3: {}
 
+  dayjs@1.11.21: {}
+
   detect-libc@2.1.2: {}
+
+  expression-language@2.7.0:
+    dependencies:
+      dayjs: 1.11.21
+      locutus: 3.0.36
 
   fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
@@ -569,6 +589,8 @@ snapshots:
       lightningcss-linux-x64-musl: 1.33.0
       lightningcss-win32-arm64-msvc: 1.33.0
       lightningcss-win32-x64-msvc: 1.33.0
+
+  locutus@3.0.36: {}
 
   nanoid@3.3.16: {}
 

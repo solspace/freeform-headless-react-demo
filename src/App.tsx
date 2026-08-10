@@ -1,11 +1,14 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
 import {
   createFreeformClient,
   type FreeformManifest,
   type SubmitResponse,
 } from "@solspace/freeform-core";
 import { Freeform, FormLoader, useFreeform } from "@solspace/freeform-react";
-import { recommendedExtensions } from "@solspace/freeform-extensions";
+import {
+  calculationExtension,
+  recommendedExtensions,
+} from "@solspace/freeform-extensions";
 import {
   darkTheme,
   lightTheme,
@@ -16,17 +19,52 @@ import {
 type ViewMode = "component" | "headless" | "manifest";
 type ColorScheme = "light" | "dark" | "system";
 
+type DraftCredentials = {
+  draftToken: string | null;
+  draftKey: string | null;
+};
+
 /** Same-origin — Vite proxies `/freeform` to Craft (see vite.config.ts). */
 const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
 const defaultHandle =
   import.meta.env.VITE_FREEFORM_HANDLE?.trim() || "contact";
 
+const demoExtensions = [...recommendedExtensions, calculationExtension];
+
 const themesByScheme: Record<ColorScheme, FreeformReactTheme> = {
   light: lightTheme,
   dark: darkTheme,
   system: systemTheme,
 };
+
+function readDraftFromUrl(): DraftCredentials {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    draftToken: params.get("session-token"),
+    draftKey: params.get("key"),
+  };
+}
+
+function writeDraftToUrl(token: string, key: string): string {
+  const url = new URL(window.location.href);
+  url.searchParams.set("session-token", token);
+  url.searchParams.set("key", key);
+  const href = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState({}, "", href);
+  return url.toString();
+}
+
+function clearDraftFromUrl(): void {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("session-token");
+  url.searchParams.delete("key");
+  window.history.replaceState(
+    {},
+    "",
+    `${url.pathname}${url.search}${url.hash}`,
+  );
+}
 
 function ManifestPanel({
   handle,
@@ -39,7 +77,13 @@ function ManifestPanel({
   const [error, setError] = useState<string | null>(null);
   const [manifest, setManifest] = useState<FreeformManifest | null>(null);
 
-  const client = useMemo(() => createFreeformClient({ baseUrl }), []);
+  const client = useMemo(() => {
+    const next = createFreeformClient({ baseUrl });
+    for (const extension of demoExtensions) {
+      next.extensions.register(extension);
+    }
+    return next;
+  }, []);
 
   async function loadManifest() {
     setLoading(true);
@@ -95,14 +139,20 @@ function ManifestPanel({
 function HeadlessForm({
   handle,
   onSubmit,
+  draftToken,
+  draftKey,
 }: {
   handle: string;
   onSubmit: (response: SubmitResponse) => void;
+  draftToken: string | null;
+  draftKey: string | null;
 }) {
   const form = useFreeform({
     handle,
     baseUrl,
-    extensions: recommendedExtensions,
+    extensions: demoExtensions,
+    draftToken,
+    draftKey,
     onSuccess: onSubmit,
     onError: onSubmit,
   });
@@ -172,9 +222,18 @@ function HeadlessForm({
         );
       })}
 
-      <button type="submit" disabled={form.isSubmitting}>
-        {form.isSubmitting ? "Submitting…" : "Submit (headless)"}
-      </button>
+      <div className="controls" style={{ display: "flex", gap: "0.5rem" }}>
+        <button type="submit" disabled={form.isSubmitting}>
+          {form.isSubmitting ? "Submitting…" : "Submit (headless)"}
+        </button>
+        <button
+          type="button"
+          disabled={form.isSubmitting}
+          onClick={() => void form.saveDraft()}
+        >
+          Save draft
+        </button>
+      </div>
 
       {form.isComplete && form.successMessage ? (
         <div className="status is-success">{form.successMessage}</div>
@@ -187,18 +246,25 @@ function ComponentForm({
   handle,
   onSubmit,
   theme,
+  draftToken,
+  draftKey,
 }: {
   handle: string;
   onSubmit: (response: SubmitResponse) => void;
   theme: FreeformReactTheme;
+  draftToken: string | null;
+  draftKey: string | null;
 }) {
   return (
     <div className="panel">
       <Freeform
+        key={`${handle}:${draftToken ?? ""}:${draftKey ?? ""}`}
         handle={handle}
         baseUrl={baseUrl}
         theme={theme}
-        extensions={recommendedExtensions}
+        extensions={demoExtensions}
+        draftToken={draftToken}
+        draftKey={draftKey}
         allowRawHtml
         loadingMessage={`Loading ${handle}…`}
         onSuccess={onSubmit}
@@ -209,13 +275,45 @@ function ComponentForm({
 }
 
 export function App() {
+  const initialDraft = useMemo(() => readDraftFromUrl(), []);
   const [handleDraft, setHandleDraft] = useState(defaultHandle);
   const [handle, setHandle] = useState(defaultHandle);
   const [mode, setMode] = useState<ViewMode>("component");
   const [colorScheme, setColorScheme] = useState<ColorScheme>("system");
   const [lastSubmit, setLastSubmit] = useState<SubmitResponse | null>(null);
   const [manifestInfo, setManifestInfo] = useState<string | null>(null);
+  const [draft, setDraft] = useState<DraftCredentials>(initialDraft);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(() => {
+    if (initialDraft.draftToken && initialDraft.draftKey) {
+      return window.location.href;
+    }
+    return null;
+  });
   const theme = themesByScheme[colorScheme];
+
+  const handleSubmitResponse = useCallback((response: SubmitResponse) => {
+    setLastSubmit(response);
+
+    if (
+      response.status === "draft_saved" &&
+      response.draft?.token &&
+      response.draft?.key
+    ) {
+      const url = writeDraftToUrl(response.draft.token, response.draft.key);
+      setDraft({
+        draftToken: response.draft.token,
+        draftKey: response.draft.key,
+      });
+      setResumeUrl(url);
+      return;
+    }
+
+    if (response.complete && response.success) {
+      clearDraftFromUrl();
+      setDraft({ draftToken: null, draftKey: null });
+      setResumeUrl(null);
+    }
+  }, []);
 
   function applyHandle(event: FormEvent) {
     event.preventDefault();
@@ -235,8 +333,8 @@ export function App() {
           <div>
             <h1>Freeform Headless React Demo</h1>
             <p>
-              Official <code>@solspace/freeform-*</code> packages from npm,
-              proxied to your Craft site via <code>/freeform</code>.
+              Official <code>@solspace/freeform-*</code> packages from npm
+              (0.1.1+), proxied to your Craft site via <code>/freeform</code>.
             </p>
           </div>
           <div
@@ -325,14 +423,29 @@ export function App() {
             {lastSubmit.complete ? " (complete)" : ""}
           </div>
         ) : null}
+
+        {resumeUrl ? (
+          <div className="status is-success">
+            <strong>Resume URL</strong> (copy / refresh to restore a saved
+            draft):
+            <div style={{ marginTop: "0.5rem", wordBreak: "break-all" }}>
+              <code>{resumeUrl}</code>
+            </div>
+            <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
+              Query params: <code>session-token</code> + <code>key</code>
+            </p>
+          </div>
+        ) : null}
       </section>
 
       {mode === "component" ? (
         <ComponentForm
           key={handle}
           handle={handle}
-          onSubmit={setLastSubmit}
+          onSubmit={handleSubmitResponse}
           theme={theme}
+          draftToken={draft.draftToken}
+          draftKey={draft.draftKey}
         />
       ) : null}
 
@@ -340,7 +453,9 @@ export function App() {
         <HeadlessForm
           key={handle}
           handle={handle}
-          onSubmit={setLastSubmit}
+          onSubmit={handleSubmitResponse}
+          draftToken={draft.draftToken}
+          draftKey={draft.draftKey}
         />
       ) : null}
 
