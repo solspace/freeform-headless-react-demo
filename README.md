@@ -117,7 +117,7 @@ You can also use `pnpm` or `yarn` if you prefer.
 
 **Save & Continue:** if the form has Save enabled, click Save — the URL gets `?session-token=…&key=…`. Refresh or share that link to resume. See [React docs → Save & Continue Later](https://docs.solspace.com/craft/freeform/v5/headless/reactjs/#save--continue-later).
 
-**Calculation fields:** included via `recommendedExtensions` (packages **0.1.1+**).
+**Calculation fields:** included via `recommendedExtensions` (packages **0.1.2+**).
 
 ### Use the same pattern in your own project
 
@@ -166,8 +166,8 @@ The same packages work in Next.js. Use a Client Component and rewrite `/freeform
 | CSRF / session errors | Keep using the Vite proxy; don’t call Craft from another origin without CORS + credentials. |
 | CORS errors | Prefer the proxy, or add `http://localhost:3000` to `headless.allowedOrigins`. |
 | Captcha / file upload missing | Enable those integrations in Freeform; this demo already loads `recommendedExtensions`. |
-| Calculation field error | Use packages **0.1.1+** (`npm update @solspace/freeform-*`). |
-| Save & Continue | Enable **Save** on the form’s Button Layout. After Save, this demo puts `session-token` + `key` in the URL — refresh to resume. |
+| Calculation field error | Use packages **0.1.2+** (`npm update @solspace/freeform-*`). |
+| Save & Continue | Enable **Save** on the form’s Button Layout. After Save, this demo puts `session-token` + `key` in the URL — refresh to resume (needs packages **0.1.2+** so values hydrate). |
 
 ## License
 

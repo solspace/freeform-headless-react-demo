@@ -258,7 +258,7 @@ function ComponentForm({
   return (
     <div className="panel">
       <Freeform
-        key={`${handle}:${draftToken ?? ""}:${draftKey ?? ""}`}
+        key={handle}
         handle={handle}
         baseUrl={baseUrl}
         theme={theme}
@@ -300,10 +300,17 @@ export function App() {
       response.draft?.key
     ) {
       const url = writeDraftToUrl(response.draft.token, response.draft.key);
-      setDraft({
-        draftToken: response.draft.token,
-        draftKey: response.draft.key,
-      });
+      // Keep existing form mounted — only sync URL + resume hint.
+      // Form state already holds values + draft tokens from applySubmitResponse.
+      setDraft((current) =>
+        current.draftToken === response.draft?.token &&
+        current.draftKey === response.draft?.key
+          ? current
+          : {
+              draftToken: response.draft.token,
+              draftKey: response.draft.key,
+            },
+      );
       setResumeUrl(url);
       return;
     }
