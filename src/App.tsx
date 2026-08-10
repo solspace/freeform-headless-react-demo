@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import {
   createFreeformClient,
   type FreeformManifest,
@@ -18,10 +24,11 @@ import {
 import {
   craftGraphql,
   HEADLESS_MANIFEST_QUERY,
-  HEADLESS_SUBMIT_MUTATION,
 } from "./graphql";
+import { graphqlFetch } from "./graphqlFetch";
 
-type ViewMode = "component" | "headless" | "manifest" | "graphql";
+type ApiMode = "rest" | "graphql";
+type ViewMode = "component" | "headless" | "manifest";
 type ColorScheme = "light" | "dark" | "system";
 
 type DraftCredentials = {
@@ -141,26 +148,20 @@ function ManifestPanel({
   );
 }
 
-function GraphqlPanel({
+function GraphqlManifestPanel({
   handle,
   onLoaded,
-  onSubmit,
 }: {
   handle: string;
   onLoaded: (manifest: FreeformManifest) => void;
-  onSubmit: (response: SubmitResponse) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manifest, setManifest] = useState<FreeformManifest | null>(null);
-  const [submitResult, setSubmitResult] = useState<SubmitResponse | null>(null);
-  const hasToken = Boolean(import.meta.env.VITE_GRAPHQL_TOKEN?.trim());
 
   async function loadManifest() {
     setLoading(true);
     setError(null);
-    setSubmitResult(null);
 
     try {
       const data = await craftGraphql<{
@@ -179,63 +180,19 @@ function GraphqlPanel({
     }
   }
 
-  async function submitViaGraphql() {
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const data = await craftGraphql<{
-        freeformHeadlessSubmit: SubmitResponse;
-      }>(HEADLESS_SUBMIT_MUTATION, {
-        handle,
-        intent: "submit",
-        values: {},
-        meta: {},
-      });
-      setSubmitResult(data.freeformHeadlessSubmit);
-      onSubmit(data.freeformHeadlessSubmit);
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "GraphQL submit failed.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   return (
     <div className="panel">
       <p>
-        Same headless contract as REST, via Craft GraphQL:{" "}
-        <code>freeformHeadlessManifest</code> and{" "}
-        <code>freeformHeadlessSubmit</code>. Requires a Craft GraphQL schema
-        token (form read + submission create + site access) in{" "}
-        <code>VITE_GRAPHQL_TOKEN</code>. File uploads still use REST multipart.
+        Raw <code>freeformHeadlessManifest</code> query (same shape as REST
+        manifest <code>data</code>).
       </p>
-
-      {!hasToken ? (
-        <div className="status is-error">
-          Add <code>VITE_GRAPHQL_TOKEN</code> to <code>.env</code> (and restart
-          the dev server) to use this tab.
-        </div>
-      ) : null}
-
-      <div className="controls" style={{ display: "flex", gap: "0.5rem" }}>
+      <div className="controls">
         <button
           type="button"
           onClick={() => void loadManifest()}
-          disabled={loading || !handle || !hasToken}
+          disabled={loading || !handle}
         >
           {loading ? "Loading…" : "Fetch GraphQL manifest"}
-        </button>
-        <button
-          type="button"
-          onClick={() => void submitViaGraphql()}
-          disabled={submitting || !handle || !hasToken}
-        >
-          {submitting ? "Submitting…" : "Submit via GraphQL"}
         </button>
       </div>
 
@@ -255,15 +212,6 @@ function GraphqlPanel({
           {JSON.stringify(manifest, null, 2)}
         </pre>
       ) : null}
-
-      {submitResult ? (
-        <>
-          <h3 className="panel-title" style={{ marginTop: "1.5rem" }}>
-            GraphQL submit response
-          </h3>
-          <pre>{JSON.stringify(submitResult, null, 2)}</pre>
-        </>
-      ) : null}
     </div>
   );
 }
@@ -273,15 +221,18 @@ function HeadlessForm({
   onSubmit,
   draftToken,
   draftKey,
+  fetchImpl,
 }: {
   handle: string;
   onSubmit: (response: SubmitResponse) => void;
   draftToken: string | null;
   draftKey: string | null;
+  fetchImpl?: typeof fetch;
 }) {
   const form = useFreeform({
     handle,
     baseUrl,
+    fetch: fetchImpl,
     extensions: demoExtensions,
     draftToken,
     draftKey,
@@ -292,7 +243,13 @@ function HeadlessForm({
   if (form.loading) {
     return (
       <div className="panel">
-        <FormLoader message={`Loading ${handle}…`} />
+        <FormLoader
+          message={
+            fetchImpl
+              ? `Loading ${handle} via GraphQL…`
+              : `Loading ${handle}…`
+          }
+        />
       </div>
     );
   }
@@ -313,7 +270,14 @@ function HeadlessForm({
     <form className="headless-form panel" onSubmit={form.handleSubmit}>
       <p>
         Headless mode: you own the markup. Core still loads the manifest,
-        manages state, and submits.
+        manages state, and submits
+        {fetchImpl ? (
+          <>
+            {" "}
+            via <code>fetch={"{graphqlFetch}"}</code>
+          </>
+        ) : null}
+        .
       </p>
 
       {form.formErrors.map((message) => (
@@ -356,7 +320,11 @@ function HeadlessForm({
 
       <div className="controls" style={{ display: "flex", gap: "0.5rem" }}>
         <button type="submit" disabled={form.isSubmitting}>
-          {form.isSubmitting ? "Submitting…" : "Submit (headless)"}
+          {form.isSubmitting
+            ? "Submitting…"
+            : fetchImpl
+              ? "Submit (GraphQL)"
+              : "Submit (headless)"}
         </button>
         <button
           type="button"
@@ -380,25 +348,42 @@ function ComponentForm({
   theme,
   draftToken,
   draftKey,
+  fetchImpl,
 }: {
   handle: string;
   onSubmit: (response: SubmitResponse) => void;
   theme: FreeformReactTheme;
   draftToken: string | null;
   draftKey: string | null;
+  fetchImpl?: typeof fetch;
 }) {
   return (
     <div className="panel">
+      {fetchImpl ? (
+        <pre className="panel-meta" style={{ marginBottom: "1rem" }}>
+          {`<Freeform
+  handle="${handle}"
+  baseUrl={window.location.origin}
+  fetch={graphqlFetch}
+  extensions={recommendedExtensions}
+/>`}
+        </pre>
+      ) : null}
       <Freeform
-        key={handle}
+        key={`${fetchImpl ? "gql" : "rest"}:${handle}:${draftToken ?? ""}:${draftKey ?? ""}`}
         handle={handle}
         baseUrl={baseUrl}
+        fetch={fetchImpl}
         theme={theme}
         extensions={demoExtensions}
         draftToken={draftToken}
         draftKey={draftKey}
         allowRawHtml
-        loadingMessage={`Loading ${handle}…`}
+        loadingMessage={
+          fetchImpl
+            ? `Loading ${handle} via GraphQL…`
+            : `Loading ${handle}…`
+        }
         onSuccess={onSubmit}
         onError={onSubmit}
       />
@@ -410,6 +395,7 @@ export function App() {
   const initialDraft = useMemo(() => readDraftFromUrl(), []);
   const [handleDraft, setHandleDraft] = useState(defaultHandle);
   const [handle, setHandle] = useState(defaultHandle);
+  const [apiMode, setApiMode] = useState<ApiMode>("rest");
   const [mode, setMode] = useState<ViewMode>("component");
   const [colorScheme, setColorScheme] = useState<ColorScheme>("system");
   const [lastSubmit, setLastSubmit] = useState<SubmitResponse | null>(null);
@@ -422,6 +408,16 @@ export function App() {
     return null;
   });
   const theme = themesByScheme[colorScheme];
+  const hasGraphqlToken = Boolean(import.meta.env.VITE_GRAPHQL_TOKEN?.trim());
+  const transportFetch = apiMode === "graphql" ? graphqlFetch : undefined;
+
+  useEffect(() => {
+    if (colorScheme === "system") {
+      delete document.documentElement.dataset.theme;
+    } else {
+      document.documentElement.dataset.theme = colorScheme;
+    }
+  }, [colorScheme]);
 
   const handleSubmitResponse = useCallback((response: SubmitResponse) => {
     setLastSubmit(response);
@@ -431,16 +427,16 @@ export function App() {
       response.draft?.token &&
       response.draft?.key
     ) {
-      const url = writeDraftToUrl(response.draft.token, response.draft.key);
+      const { token, key } = response.draft;
+      const url = writeDraftToUrl(token, key);
       // Keep existing form mounted — only sync URL + resume hint.
       // Form state already holds values + draft tokens from applySubmitResponse.
       setDraft((current) =>
-        current.draftToken === response.draft?.token &&
-        current.draftKey === response.draft?.key
+        current.draftToken === token && current.draftKey === key
           ? current
           : {
-              draftToken: response.draft.token,
-              draftKey: response.draft.key,
+              draftToken: token,
+              draftKey: key,
             },
       );
       setResumeUrl(url);
@@ -465,16 +461,26 @@ export function App() {
     setManifestInfo(null);
   }
 
+  function switchApiMode(next: ApiMode) {
+    if (next === "graphql" && !hasGraphqlToken) {
+      return;
+    }
+    setApiMode(next);
+    setLastSubmit(null);
+    setManifestInfo(null);
+  }
+
   return (
     <div className="app" data-theme={colorScheme}>
       <header>
         <div className="header-row">
-          <div>
+          <div className="header-row__copy">
             <h1>Freeform Headless React Demo</h1>
             <p>
-              Official <code>@solspace/freeform-*</code> packages from npm,
-              proxied to your Craft site via <code>/freeform</code> (REST) or{" "}
-              <code>/actions/graphql/api</code> (GraphQL tab).
+              Official <code>@solspace/freeform-*</code> packages from npm.
+              Choose <strong>REST</strong> or <strong>GraphQL</strong>, then try{" "}
+              <code>&lt;Freeform /&gt;</code>, <code>useFreeform()</code>, or
+              Manifest JSON.
             </p>
           </div>
           <div
@@ -524,91 +530,173 @@ export function App() {
         </p>
       </section>
 
-      <section className="panel">
-        <div className="tabs">
-          <button
-            type="button"
-            className={`tab ${mode === "component" ? "is-active" : ""}`}
-            onClick={() => setMode("component")}
-          >
-            &lt;Freeform /&gt;
-          </button>
-          <button
-            type="button"
-            className={`tab ${mode === "headless" ? "is-active" : ""}`}
-            onClick={() => setMode("headless")}
-          >
-            useFreeform()
-          </button>
-          <button
-            type="button"
-            className={`tab ${mode === "manifest" ? "is-active" : ""}`}
-            onClick={() => setMode("manifest")}
-          >
-            Manifest JSON
-          </button>
-          <button
-            type="button"
-            className={`tab ${mode === "graphql" ? "is-active" : ""}`}
-            onClick={() => setMode("graphql")}
-          >
-            GraphQL
-          </button>
-        </div>
-
-        {manifestInfo ? (
-          <div className="status">
-            Loaded manifest: <strong>{manifestInfo}</strong>
-          </div>
-        ) : null}
-
-        {lastSubmit ? (
-          <div
-            className={`status ${lastSubmit.success ? "is-success" : "is-error"}`}
-          >
-            Last submit: <code>{lastSubmit.status}</code>
-            {lastSubmit.complete ? " (complete)" : ""}
-          </div>
-        ) : null}
-
-        {resumeUrl ? (
-          <div className="status is-success">
-            <strong>Resume URL</strong> (copy / refresh to restore a saved
-            draft):
-            <div style={{ marginTop: "0.5rem", wordBreak: "break-all" }}>
-              <code>{resumeUrl}</code>
-            </div>
-            <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-              Query params: <code>session-token</code> + <code>key</code>
+      <section className="panel panel--demo">
+        <div className="demo-toolbar">
+          <div className="demo-toolbar__head">
+            <h2 className="panel-title">Try the form</h2>
+            <p className="panel-help demo-toolbar__lead">
+              Pick how the demo talks to Craft, then choose a React integration
+              style.
             </p>
           </div>
-        ) : null}
+
+          <div className="demo-toolbar__section">
+            <span className="demo-toolbar__label">API transport</span>
+            <div className="api-picker" role="tablist" aria-label="API mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={apiMode === "rest"}
+                className={`api-picker__option api-picker__option--rest ${apiMode === "rest" ? "is-active" : ""}`}
+                onClick={() => switchApiMode("rest")}
+              >
+                <span className="api-picker__title">REST</span>
+                <span className="api-picker__desc">
+                  <code>/freeform</code> headless endpoints
+                </span>
+                <span className="api-picker__badge">Default</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={apiMode === "graphql"}
+                className={`api-picker__option api-picker__option--graphql ${apiMode === "graphql" ? "is-active" : ""}`}
+                onClick={() => switchApiMode("graphql")}
+                title={
+                  hasGraphqlToken
+                    ? undefined
+                    : "Set VITE_GRAPHQL_TOKEN in .env to enable GraphQL"
+                }
+                disabled={!hasGraphqlToken}
+              >
+                <span className="api-picker__title">GraphQL</span>
+                <span className="api-picker__desc">
+                  Craft <code>freeformHeadless*</code> adapters
+                </span>
+                {!hasGraphqlToken ? (
+                  <span className="api-picker__badge api-picker__badge--muted">
+                    Token required
+                  </span>
+                ) : null}
+              </button>
+            </div>
+          </div>
+
+          <div className="demo-toolbar__section">
+            <span className="demo-toolbar__label">Demo view</span>
+            <div className="view-picker" role="tablist" aria-label="Demo view">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "component"}
+                className={`view-picker__tab ${mode === "component" ? "is-active" : ""}`}
+                onClick={() => setMode("component")}
+              >
+                &lt;Freeform /&gt;
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "headless"}
+                className={`view-picker__tab ${mode === "headless" ? "is-active" : ""}`}
+                onClick={() => setMode("headless")}
+              >
+                useFreeform()
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "manifest"}
+                className={`view-picker__tab ${mode === "manifest" ? "is-active" : ""}`}
+                onClick={() => setMode("manifest")}
+              >
+                Manifest JSON
+              </button>
+            </div>
+          </div>
+
+          {!hasGraphqlToken ? (
+            <p className="demo-callout demo-callout--info">
+              Add <code>VITE_GRAPHQL_TOKEN</code> to <code>.env</code> to unlock
+              GraphQL (Craft schema: form read + submit + site access).
+            </p>
+          ) : apiMode === "graphql" ? (
+            <p className="demo-callout demo-callout--graphql">
+              GraphQL mode passes <code>fetch={"{graphqlFetch}"}</code> to the
+              React packages. File uploads still use REST multipart.
+            </p>
+          ) : (
+            <p className="demo-callout demo-callout--rest">
+              REST mode uses the official headless API — best starting point for
+              new projects.
+            </p>
+          )}
+        </div>
+
+        {(manifestInfo || lastSubmit || resumeUrl) && (
+          <div className="demo-feedback">
+            {manifestInfo ? (
+              <div className="status">
+                Loaded manifest: <strong>{manifestInfo}</strong>
+              </div>
+            ) : null}
+
+            {lastSubmit ? (
+              <div
+                className={`status ${lastSubmit.success ? "is-success" : "is-error"}`}
+              >
+                Last submit: <code>{lastSubmit.status}</code>
+                {lastSubmit.complete ? " (complete)" : ""}
+                <span
+                  className={`transport-tag transport-tag--${apiMode}`}
+                >
+                  {apiMode.toUpperCase()}
+                </span>
+              </div>
+            ) : null}
+
+            {resumeUrl ? (
+              <div className="status is-success">
+                <strong>Resume URL</strong> (copy / refresh to restore a saved
+                draft):
+                <div className="resume-url">
+                  <code>{resumeUrl}</code>
+                </div>
+                <p className="resume-hint">
+                  Query params: <code>session-token</code> + <code>key</code>
+                </p>
+              </div>
+            ) : null}
+          </div>
+        )}
       </section>
 
       {mode === "component" ? (
         <ComponentForm
-          key={handle}
+          key={`${apiMode}:${handle}`}
           handle={handle}
           onSubmit={handleSubmitResponse}
           theme={theme}
           draftToken={draft.draftToken}
           draftKey={draft.draftKey}
+          fetchImpl={transportFetch}
         />
       ) : null}
 
       {mode === "headless" ? (
         <HeadlessForm
-          key={handle}
+          key={`${apiMode}:${handle}`}
           handle={handle}
           onSubmit={handleSubmitResponse}
           draftToken={draft.draftToken}
           draftKey={draft.draftKey}
+          fetchImpl={transportFetch}
         />
       ) : null}
 
-      {mode === "manifest" ? (
+      {mode === "manifest" && apiMode === "rest" ? (
         <ManifestPanel
-          key={handle}
+          key={`rest:${handle}`}
           handle={handle}
           onLoaded={(manifest) =>
             setManifestInfo(
@@ -618,16 +706,15 @@ export function App() {
         />
       ) : null}
 
-      {mode === "graphql" ? (
-        <GraphqlPanel
-          key={handle}
+      {mode === "manifest" && apiMode === "graphql" ? (
+        <GraphqlManifestPanel
+          key={`gql:${handle}`}
           handle={handle}
           onLoaded={(manifest) =>
             setManifestInfo(
               `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · GraphQL`,
             )
           }
-          onSubmit={handleSubmitResponse}
         />
       ) : null}
 

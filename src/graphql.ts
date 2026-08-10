@@ -62,6 +62,7 @@ export const HEADLESS_SUBMIT_MUTATION = `
     $values: FreeformJson
     $meta: FreeformJson
     $context: FreeformJson
+    $csrfToken: String
   ) {
     freeformHeadlessSubmit(
       handle: $handle
@@ -69,6 +70,7 @@ export const HEADLESS_SUBMIT_MUTATION = `
       values: $values
       meta: $meta
       context: $context
+      csrfToken: $csrfToken
     )
   }
 `;

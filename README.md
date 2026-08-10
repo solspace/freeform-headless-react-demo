@@ -115,14 +115,36 @@ You can also use `pnpm` or `yarn` if you prefer.
 
 ### Try the demo modes
 
+**1. Pick an API** (top tabs)
+
+| Tab | What it uses |
+| --- | --- |
+| **REST** | `/freeform` headless endpoints (recommended default) |
+| **GraphQL** | Craft GraphQL adapters via `fetch={graphqlFetch}` |
+
+**2. Pick a view** (second row)
+
 | Tab | What it shows |
 | --- | --- |
-| `<Freeform />` | Full form with the default theme (easiest — REST) |
-| `useFreeform()` | Headless hook — you own the markup (REST) |
-| Manifest JSON | Raw REST manifest (useful for debugging) |
-| GraphQL | Same manifest/submit contract via Craft GraphQL (`freeformHeadlessManifest` / `freeformHeadlessSubmit`) |
+| `<Freeform />` | Full form with the default theme |
+| `useFreeform()` | Headless hook — you own the markup |
+| Manifest JSON | Raw manifest (REST or GraphQL depending on the API tab) |
 
-**GraphQL tab:** create a Craft GraphQL schema with Freeform form read + submission create, enable your **site**, and paste a token into `VITE_GRAPHQL_TOKEN`. File uploads still go through REST multipart.
+**GraphQL:** create a Craft GraphQL schema with Freeform form read + submission create, enable your **site**, and paste a token into `VITE_GRAPHQL_TOKEN`. Pass the demo’s `graphqlFetch` helper as `fetch`:
+
+```tsx
+import { Freeform } from "@solspace/freeform-react";
+import { graphqlFetch } from "./graphqlFetch"; // see this repo
+
+<Freeform
+  handle="contact"
+  baseUrl={window.location.origin}
+  fetch={graphqlFetch}
+  extensions={recommendedExtensions}
+/>
+```
+
+JSON submits use GraphQL; multipart file uploads still go through REST.
 
 **Save & Continue:** if the form has Save enabled, click Save — the URL gets `?session-token=…&key=…`. Refresh or share that link to resume. See [React docs → Save & Continue Later](https://docs.solspace.com/craft/freeform/v5/headless/reactjs/#save--continue-later).
 
