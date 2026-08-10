@@ -37,6 +37,12 @@ export default defineConfig(({ mode }) => {
             });
           },
         },
+        // Craft GraphQL (freeformHeadlessManifest / freeformHeadlessSubmit)
+        "/actions": {
+          target: craftTarget,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
   };

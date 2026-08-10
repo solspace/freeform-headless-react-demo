@@ -15,8 +15,13 @@ import {
   systemTheme,
   type FreeformReactTheme,
 } from "@solspace/freeform-react-theme-default";
+import {
+  craftGraphql,
+  HEADLESS_MANIFEST_QUERY,
+  HEADLESS_SUBMIT_MUTATION,
+} from "./graphql";
 
-type ViewMode = "component" | "headless" | "manifest";
+type ViewMode = "component" | "headless" | "manifest" | "graphql";
 type ColorScheme = "light" | "dark" | "system";
 
 type DraftCredentials = {
@@ -131,6 +136,133 @@ function ManifestPanel({
         <pre style={{ marginTop: "1rem" }}>
           {JSON.stringify(manifest, null, 2)}
         </pre>
+      ) : null}
+    </div>
+  );
+}
+
+function GraphqlPanel({
+  handle,
+  onLoaded,
+  onSubmit,
+}: {
+  handle: string;
+  onLoaded: (manifest: FreeformManifest) => void;
+  onSubmit: (response: SubmitResponse) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [manifest, setManifest] = useState<FreeformManifest | null>(null);
+  const [submitResult, setSubmitResult] = useState<SubmitResponse | null>(null);
+  const hasToken = Boolean(import.meta.env.VITE_GRAPHQL_TOKEN?.trim());
+
+  async function loadManifest() {
+    setLoading(true);
+    setError(null);
+    setSubmitResult(null);
+
+    try {
+      const data = await craftGraphql<{
+        freeformHeadlessManifest: FreeformManifest;
+      }>(HEADLESS_MANIFEST_QUERY, { handle });
+      setManifest(data.freeformHeadlessManifest);
+      onLoaded(data.freeformHeadlessManifest);
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Failed to load GraphQL manifest.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitViaGraphql() {
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const data = await craftGraphql<{
+        freeformHeadlessSubmit: SubmitResponse;
+      }>(HEADLESS_SUBMIT_MUTATION, {
+        handle,
+        intent: "submit",
+        values: {},
+        meta: {},
+      });
+      setSubmitResult(data.freeformHeadlessSubmit);
+      onSubmit(data.freeformHeadlessSubmit);
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "GraphQL submit failed.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="panel">
+      <p>
+        Same headless contract as REST, via Craft GraphQL:{" "}
+        <code>freeformHeadlessManifest</code> and{" "}
+        <code>freeformHeadlessSubmit</code>. Requires a Craft GraphQL schema
+        token (form read + submission create + site access) in{" "}
+        <code>VITE_GRAPHQL_TOKEN</code>. File uploads still use REST multipart.
+      </p>
+
+      {!hasToken ? (
+        <div className="status is-error">
+          Add <code>VITE_GRAPHQL_TOKEN</code> to <code>.env</code> (and restart
+          the dev server) to use this tab.
+        </div>
+      ) : null}
+
+      <div className="controls" style={{ display: "flex", gap: "0.5rem" }}>
+        <button
+          type="button"
+          onClick={() => void loadManifest()}
+          disabled={loading || !handle || !hasToken}
+        >
+          {loading ? "Loading…" : "Fetch GraphQL manifest"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void submitViaGraphql()}
+          disabled={submitting || !handle || !hasToken}
+        >
+          {submitting ? "Submitting…" : "Submit via GraphQL"}
+        </button>
+      </div>
+
+      {error ? <div className="status is-error">{error}</div> : null}
+
+      {loading ? (
+        <div style={{ marginTop: "1rem" }}>
+          <FormLoader
+            message={`Fetching ${handle} via GraphQL…`}
+            variant="spinner"
+          />
+        </div>
+      ) : null}
+
+      {manifest ? (
+        <pre style={{ marginTop: "1rem" }}>
+          {JSON.stringify(manifest, null, 2)}
+        </pre>
+      ) : null}
+
+      {submitResult ? (
+        <>
+          <h3 className="panel-title" style={{ marginTop: "1.5rem" }}>
+            GraphQL submit response
+          </h3>
+          <pre>{JSON.stringify(submitResult, null, 2)}</pre>
+        </>
       ) : null}
     </div>
   );
@@ -340,8 +472,9 @@ export function App() {
           <div>
             <h1>Freeform Headless React Demo</h1>
             <p>
-              Official <code>@solspace/freeform-*</code> packages from npm
-              (0.1.1+), proxied to your Craft site via <code>/freeform</code>.
+              Official <code>@solspace/freeform-*</code> packages from npm,
+              proxied to your Craft site via <code>/freeform</code> (REST) or{" "}
+              <code>/actions/graphql/api</code> (GraphQL tab).
             </p>
           </div>
           <div
@@ -414,6 +547,13 @@ export function App() {
           >
             Manifest JSON
           </button>
+          <button
+            type="button"
+            className={`tab ${mode === "graphql" ? "is-active" : ""}`}
+            onClick={() => setMode("graphql")}
+          >
+            GraphQL
+          </button>
         </div>
 
         {manifestInfo ? (
@@ -472,9 +612,22 @@ export function App() {
           handle={handle}
           onLoaded={(manifest) =>
             setManifestInfo(
-              `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields)`,
+              `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · REST`,
             )
           }
+        />
+      ) : null}
+
+      {mode === "graphql" ? (
+        <GraphqlPanel
+          key={handle}
+          handle={handle}
+          onLoaded={(manifest) =>
+            setManifestInfo(
+              `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · GraphQL`,
+            )
+          }
+          onSubmit={handleSubmitResponse}
         />
       ) : null}
 

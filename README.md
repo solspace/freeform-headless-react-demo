@@ -74,17 +74,23 @@ cp .env.example .env
 Edit `.env`:
 
 ```bash
-# Craft site URL (Vite proxies /freeform here)
+# Craft site URL (Vite proxies /freeform and /actions here)
 CRAFT_PROXY_TARGET=https://your-site.example
 
 # Form handle from Freeform (same as in step 1)
 VITE_FREEFORM_HANDLE=contact
+
+# Optional — GraphQL tab
+VITE_GRAPHQL_PATH=/actions/graphql/api
+VITE_GRAPHQL_TOKEN=your-craft-graphql-token
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `CRAFT_PROXY_TARGET` | Your Craft / Freeform site URL |
 | `VITE_FREEFORM_HANDLE` | Default form handle shown when the app starts |
+| `VITE_GRAPHQL_PATH` | Craft GraphQL endpoint (default `/actions/graphql/api`) |
+| `VITE_GRAPHQL_TOKEN` | Craft GraphQL schema token (needed for the GraphQL tab) |
 
 ## 3. Install and run
 
@@ -111,9 +117,12 @@ You can also use `pnpm` or `yarn` if you prefer.
 
 | Tab | What it shows |
 | --- | --- |
-| `<Freeform />` | Full form with the default theme (easiest) |
-| `useFreeform()` | Headless hook — you own the markup |
-| Manifest JSON | Raw API response (useful for debugging) |
+| `<Freeform />` | Full form with the default theme (easiest — REST) |
+| `useFreeform()` | Headless hook — you own the markup (REST) |
+| Manifest JSON | Raw REST manifest (useful for debugging) |
+| GraphQL | Same manifest/submit contract via Craft GraphQL (`freeformHeadlessManifest` / `freeformHeadlessSubmit`) |
+
+**GraphQL tab:** create a Craft GraphQL schema with Freeform form read + submission create, enable your **site**, and paste a token into `VITE_GRAPHQL_TOKEN`. File uploads still go through REST multipart.
 
 **Save & Continue:** if the form has Save enabled, click Save — the URL gets `?session-token=…&key=…`. Refresh or share that link to resume. See [React docs → Save & Continue Later](https://docs.solspace.com/craft/freeform/v5/headless/reactjs/#save--continue-later).
 
