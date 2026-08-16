@@ -262,9 +262,14 @@ function HeadlessForm({
     return null;
   }
 
-  const visibleHandles = Object.keys(form.manifest.fields).filter(
-    (fieldHandle) => form.isFieldVisible(fieldHandle),
-  );
+  const pages = form.manifest.layout.pages;
+  const currentPage = pages[form.currentPageIndex] ?? pages[0];
+  const isFirstPage = form.currentPageIndex === 0;
+  const isLastPage =
+    pages.length === 0 || form.currentPageIndex >= pages.length - 1;
+  const visibleHandles = (currentPage?.rows ?? [])
+    .flatMap((row) => row.fields)
+    .filter((fieldHandle) => form.isFieldVisible(fieldHandle));
 
   return (
     <form className="headless-form panel" onSubmit={form.handleSubmit}>
@@ -281,6 +286,11 @@ function HeadlessForm({
       </p>
 
       {form.formErrors.map((message) => (
+        <div key={message} className="status is-error">
+          {message}
+        </div>
+      ))}
+      {form.pageErrors.map((message) => (
         <div key={message} className="status is-error">
           {message}
         </div>
@@ -319,20 +329,38 @@ function HeadlessForm({
       })}
 
       <div className="controls" style={{ display: "flex", gap: "0.5rem" }}>
-        <button type="submit" disabled={form.isSubmitting}>
-          {form.isSubmitting
-            ? "Submitting…"
-            : fetchImpl
-              ? "Submit (GraphQL)"
-              : "Submit (headless)"}
-        </button>
-        <button
-          type="button"
-          disabled={form.isSubmitting}
-          onClick={() => void form.saveDraft()}
-        >
-          Save draft
-        </button>
+        {!isFirstPage && currentPage?.buttons.back ? (
+          <button
+            type="button"
+            disabled={form.isSubmitting}
+            onClick={() => void form.goBack()}
+          >
+            {currentPage.buttons.back.label}
+          </button>
+        ) : null}
+        {!isLastPage && currentPage?.buttons.submit ? (
+          <button
+            type="button"
+            disabled={form.isSubmitting}
+            onClick={() => void form.goNext()}
+          >
+            {form.isSubmitting ? "Loading…" : currentPage.buttons.submit.label}
+          </button>
+        ) : null}
+        {isLastPage && currentPage?.buttons.submit ? (
+          <button type="submit" disabled={form.isSubmitting}>
+            {form.isSubmitting ? "Submitting…" : currentPage.buttons.submit.label}
+          </button>
+        ) : null}
+        {currentPage?.buttons.save ? (
+          <button
+            type="button"
+            disabled={form.isSubmitting}
+            onClick={() => void form.saveDraft()}
+          >
+            {currentPage.buttons.save.label}
+          </button>
+        ) : null}
       </div>
 
       {form.isComplete && form.successMessage ? (
