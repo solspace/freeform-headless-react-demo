@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@solspace/freeform-core':
-        specifier: ^0.1.6
-        version: 0.1.6
+        specifier: ^0.1.7
+        version: 0.1.7
       '@solspace/freeform-extensions':
-        specifier: ^0.1.6
-        version: 0.1.6(@solspace/freeform-core@0.1.6)
+        specifier: ^0.1.7
+        version: 0.1.7(@solspace/freeform-core@0.1.7)
       '@solspace/freeform-react':
-        specifier: ^0.1.6
-        version: 0.1.6(@solspace/freeform-core@0.1.6)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^0.1.7
+        version: 0.1.7(@solspace/freeform-core@0.1.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@solspace/freeform-react-theme-default':
-        specifier: ^0.1.6
-        version: 0.1.6(@solspace/freeform-react@0.1.6(@solspace/freeform-core@0.1.6)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        specifier: ^0.1.7
+        version: 0.1.7(@solspace/freeform-react@0.1.7(@solspace/freeform-core@0.1.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -164,21 +164,21 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@solspace/freeform-core@0.1.6':
-    resolution: {integrity: sha512-8AiY+C+AQD1Pb7cPT9DG3kCTTpMzG6dh1f81+zqhG8aQo4THZycgm2uu64E/pw7jhgP/62IvnSjgHdthz8zCtw==}
+  '@solspace/freeform-core@0.1.7':
+    resolution: {integrity: sha512-Zd2MxDaQdDY9SfLYaUlDiXUxzjLvquBhwmZ6TvMX5q69h3HGK35X1M3xuazW4NjA8MceGSiTXVu7hbLKd0jMaw==}
 
-  '@solspace/freeform-extensions@0.1.6':
-    resolution: {integrity: sha512-+5k0R2HO3VC81+9EO5MalZbC4J258ZuMJBWx20+IhW36aeT6o7CifQ5deJnkGbUHgkKHdygCiwI3JmDzXBxthw==}
+  '@solspace/freeform-extensions@0.1.7':
+    resolution: {integrity: sha512-sMEIBKdKvkdM5VFXcoGX+lGcfrPByvL4oyMyVaBEnPMtzcDUm30hewG8OYmB3kZHXyzWhPnWeZkLd0I9fjSTDw==}
     peerDependencies:
       '@solspace/freeform-core': ^0.1.0
 
-  '@solspace/freeform-react-theme-default@0.1.6':
-    resolution: {integrity: sha512-34r4K2PcR6aVSuUm8I4nKxPBZfVmg7nkPkBzzUBsV8v5415nlDco4h4OCYdZbwRNH1O5Ne2Z4dFWpjIkwlLXGw==}
+  '@solspace/freeform-react-theme-default@0.1.7':
+    resolution: {integrity: sha512-ZaIwFtNUrkNyV4GOZu8YMj9LQXcxpX2KKPS6WgtkX4Iwx9aNdCVStLMmfwl1N1SKxRln/fW5pQXBsonjGaqd1w==}
     peerDependencies:
       '@solspace/freeform-react': ^0.1.0
 
-  '@solspace/freeform-react@0.1.6':
-    resolution: {integrity: sha512-AAk3cbWYh8EcNeKLaqpoSdI6YPyrIWiIXdD+LeoFdbQ3HxoWghD6D8kVNa0niPZgls4lWFkB9bZzgIXcOmcFFw==}
+  '@solspace/freeform-react@0.1.7':
+    resolution: {integrity: sha512-JvaNZrHXs7mjBB2J/g330JU0t7POEB0t2Z22QlpZ3bFpNRjv5hMmb6rogSxPA8lrr/mGNTHDgVsllhpO90wWww==}
     peerDependencies:
       '@solspace/freeform-core': ^0.1.0
       react: ^18.0.0 || ^19.0.0
@@ -489,24 +489,24 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@solspace/freeform-core@0.1.6':
+  '@solspace/freeform-core@0.1.7':
     dependencies:
       expression-language: 2.7.0
 
-  '@solspace/freeform-extensions@0.1.6(@solspace/freeform-core@0.1.6)':
+  '@solspace/freeform-extensions@0.1.7(@solspace/freeform-core@0.1.7)':
     dependencies:
       '@friendlycaptcha/sdk': 0.1.37
-      '@solspace/freeform-core': 0.1.6
+      '@solspace/freeform-core': 0.1.7
       '@stripe/stripe-js': 8.11.0
       expression-language: 2.7.0
 
-  '@solspace/freeform-react-theme-default@0.1.6(@solspace/freeform-react@0.1.6(@solspace/freeform-core@0.1.6)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
+  '@solspace/freeform-react-theme-default@0.1.7(@solspace/freeform-react@0.1.7(@solspace/freeform-core@0.1.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
     dependencies:
-      '@solspace/freeform-react': 0.1.6(@solspace/freeform-core@0.1.6)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@solspace/freeform-react': 0.1.7(@solspace/freeform-core@0.1.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
-  '@solspace/freeform-react@0.1.6(@solspace/freeform-core@0.1.6)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@solspace/freeform-react@0.1.7(@solspace/freeform-core@0.1.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
-      '@solspace/freeform-core': 0.1.6
+      '@solspace/freeform-core': 0.1.7
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
