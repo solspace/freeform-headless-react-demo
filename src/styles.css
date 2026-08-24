@@ -140,6 +140,20 @@ header h1 {
   letter-spacing: -0.02em;
 }
 
+.package-source {
+  display: inline-block;
+  margin-left: 0.55rem;
+  vertical-align: middle;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--demo-muted);
+  border: 1px solid var(--demo-border);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
 header p {
   margin: 0;
   color: var(--demo-muted);

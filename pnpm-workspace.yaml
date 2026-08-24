@@ -5,3 +5,4 @@ minimumReleaseAgeExclude:
   - "@solspace/freeform-react"
   - "@solspace/freeform-extensions"
   - "@solspace/freeform-react-theme-default"
+  - "@solspace/freeform-react-theme-tailwind"

@@ -1,26 +1,31 @@
 {
   "name": "@solspace/freeform-headless-react-demo",
   "private": true,
-  "version": "0.1.12",
+  "version": "0.1.13",
   "type": "module",
-  "description": "Example React app using published @solspace/freeform-* packages against Craft Freeform headless API",
+  "description": "Example React app using @solspace/freeform-* from npm or a local Craft Freeform checkout",
   "scripts": {
     "dev": "vite",
+    "dev:local": "FREEFORM_PACKAGES=local vite",
+    "dev:npm": "FREEFORM_PACKAGES=npm vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solspace/freeform-core": "^0.1.12",
-    "@solspace/freeform-extensions": "^0.1.12",
-    "@solspace/freeform-react": "^0.1.12",
-    "@solspace/freeform-react-theme-default": "^0.1.12",
+    "@solspace/freeform-core": "^0.1.13",
+    "@solspace/freeform-extensions": "^0.1.13",
+    "@solspace/freeform-react": "^0.1.13",
+    "@solspace/freeform-react-theme-default": "^0.1.13",
+    "@solspace/freeform-react-theme-tailwind": "^0.1.13",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@tailwindcss/vite": "^4.1.12",
     "@vitejs/plugin-react": "^6.0.3",
+    "tailwindcss": "^4.1.12",
     "typescript": "^5.8.3",
     "vite": "^8.1.0"
   },

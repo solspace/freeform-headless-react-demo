@@ -1,6 +1,8 @@
 # Freeform Headless React Demo
 
-Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms using the official npm packages:
+Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms. This is the only React demo — switch package source with `FREEFORM_PACKAGES` (npm vs local Craft checkout).
+
+Official packages:
 
 | Package | Role |
 | --- | --- |
@@ -8,6 +10,7 @@ Example **Vite + React** app that renders [Solspace Freeform](https://docs.solsp
 | [`@solspace/freeform-react`](https://www.npmjs.com/package/@solspace/freeform-react) | `<Freeform />` and `useFreeform()` |
 | [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop, table, signature |
 | [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
+| [`@solspace/freeform-react-theme-tailwind`](https://www.npmjs.com/package/@solspace/freeform-react-theme-tailwind) | Official Tailwind starter (class maps, no CSS) |
 
 ## What you need
 
@@ -74,6 +77,10 @@ cp .env.example .env
 Edit `.env`:
 
 ```bash
+# npm (default) = packages from npmjs.com
+# local = sibling Craft Freeform at ../../freeform/packages/frontend
+FREEFORM_PACKAGES=npm
+
 # Craft site URL (Vite proxies /freeform and /actions here)
 CRAFT_PROXY_TARGET=https://your-site.example
 
@@ -87,6 +94,7 @@ VITE_GRAPHQL_TOKEN=your-craft-graphql-token
 
 | Variable | Purpose |
 | --- | --- |
+| `FREEFORM_PACKAGES` | `npm` (published packages) or `local` (Craft Freeform checkout) |
 | `CRAFT_PROXY_TARGET` | Your Craft / Freeform site URL |
 | `VITE_FREEFORM_HANDLE` | Default form handle shown when the app starts |
 | `VITE_GRAPHQL_PATH` | Craft GraphQL endpoint (default `/actions/graphql/api`) |
@@ -95,15 +103,31 @@ VITE_GRAPHQL_TOKEN=your-craft-graphql-token
 ## 3. Install and run
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
 How it connects: the React app calls `/freeform/...` on **localhost**. Vite proxies those requests to `CRAFT_PROXY_TARGET`, so CSRF cookies work on the same origin.
 
-You can also use `pnpm` or `yarn` if you prefer.
+Use `npm` or `yarn` if you prefer. This demo’s `package.json` pins `@solspace/freeform-*` from the registry.
+
+### Local Craft packages vs npm
+
+Restart Vite after changing this. The header badge shows **npm** or **local**.
+
+| Command / env | Packages |
+| --- | --- |
+| `pnpm dev` or `pnpm dev:npm` | `@solspace/freeform-*` from [npmjs.com](https://www.npmjs.com/org/solspace) |
+| `pnpm dev:local` | Source under `../../freeform/packages/frontend` (this folder must sit next to the Freeform plugin) |
+
+```bash
+# .env
+FREEFORM_PACKAGES=local   # or npm
+```
+
+`local` is opt-in. Just having the sibling Freeform repo on disk does **not** switch you off npm.
 
 ## How to use a form in this app
 
@@ -111,7 +135,7 @@ You can also use `pnpm` or `yarn` if you prefer.
 
 1. Make sure the form is headless-enabled (step 1).
 2. In the app **Form settings**, enter the form handle → **Load form**.  
-   Or set `VITE_FREEFORM_HANDLE` in `.env` and restart `npm run dev`.
+   Or set `VITE_FREEFORM_HANDLE` in `.env` and restart `pnpm dev`.
 
 ### Try the demo modes
 
@@ -174,9 +198,11 @@ When `/freeform` is proxied (or served) on the same host as your frontend, keep 
 
 | Command | Description |
 | --- | --- |
-| `npm run dev` | Dev server (port `3000` by default) |
-| `npm run build` | Production build → `dist/` |
-| `npm run preview` | Preview the production build |
+| `pnpm dev` | Dev server (uses `FREEFORM_PACKAGES` from `.env`, default **npm**) |
+| `pnpm dev:npm` | Force packages from npmjs.com |
+| `pnpm dev:local` | Force sibling Craft Freeform packages |
+| `pnpm build` | Production build → `dist/` |
+| `pnpm preview` | Preview the production build |
 
 Custom port: `PORT=3001 npm run dev`
 
