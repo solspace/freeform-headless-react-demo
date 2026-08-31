@@ -9,9 +9,9 @@ Official packages:
 | [`@solspace/freeform-core`](https://www.npmjs.com/package/@solspace/freeform-core) | Manifest, state, submit |
 | [`@solspace/freeform-react`](https://www.npmjs.com/package/@solspace/freeform-react) | `<Freeform />` and `useFreeform()` |
 | [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop, table, signature |
-| [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
-| [`@solspace/freeform-react-theme-tailwind`](https://www.npmjs.com/package/@solspace/freeform-react-theme-tailwind) | Official Tailwind starter (class maps, no CSS) |
-| [`@solspace/freeform-react-theme-bootstrap`](https://www.npmjs.com/package/@solspace/freeform-react-theme-bootstrap) | Official Bootstrap 5 starter (class maps, no CSS) |
+| [`@solspace/freeform-theme-default`](https://www.npmjs.com/package/@solspace/freeform-theme-default) | Default light / dark theme |
+| [`@solspace/freeform-theme-tailwind`](https://www.npmjs.com/package/@solspace/freeform-theme-tailwind) | Official Tailwind starter (class maps, no CSS) |
+| [`@solspace/freeform-theme-bootstrap`](https://www.npmjs.com/package/@solspace/freeform-theme-bootstrap) | Official Bootstrap 5 starter (class maps, no CSS) |
 
 ## What you need
 
@@ -120,8 +120,8 @@ Restart Vite after changing this. The header badge shows **npm** or **local**.
 
 | Command / env | Packages |
 | --- | --- |
-| `pnpm dev` or `pnpm dev:npm` | `@solspace/freeform-*` from [npmjs.com](https://www.npmjs.com/org/solspace) |
-| `pnpm dev:local` | Source under `../../freeform/packages/frontend` (this folder must sit next to the Freeform plugin) |
+| `pnpm dev` or `pnpm dev:npm` | `@solspace/freeform-core`, `-react`, `-extensions` from npm; themes from `file:../../freeform/...` when that path exists |
+| `pnpm dev:local` | All packages from `../../freeform/packages/frontend` via Vite aliases |
 
 ```bash
 # .env
@@ -180,7 +180,7 @@ JSON submits use GraphQL; multipart file uploads still go through REST.
 ```tsx
 import { Freeform } from "@solspace/freeform-react";
 import { recommendedExtensions } from "@solspace/freeform-extensions";
-import "@solspace/freeform-react-theme-default/styles.css";
+import "@solspace/freeform-theme-default/styles.css";
 
 export function ContactForm() {
   return (
@@ -200,9 +200,11 @@ When `/freeform` is proxied (or served) on the same host as your frontend, keep 
 | Command | Description |
 | --- | --- |
 | `pnpm dev` | Dev server (uses `FREEFORM_PACKAGES` from `.env`, default **npm**) |
-| `pnpm dev:npm` | Force packages from npmjs.com |
-| `pnpm dev:local` | Force sibling Craft Freeform packages |
-| `pnpm build` | Production build → `dist/` |
+| `pnpm dev:npm` | Force **published** `@solspace/freeform-*` from npmjs.com |
+| `pnpm dev:local` | Force sibling Craft Freeform packages (`../../freeform/packages/frontend`) |
+| `pnpm build` | Production build (respects `FREEFORM_PACKAGES` from env) |
+| `pnpm build:npm` | Build against npm packages |
+| `pnpm build:local` | Build against local Freeform checkout |
 | `pnpm preview` | Preview the production build |
 
 Custom port: `PORT=3001 npm run dev`

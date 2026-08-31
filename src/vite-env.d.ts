@@ -12,14 +12,14 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-declare module "@solspace/freeform-react-theme-tailwind" {
+declare module "@solspace/freeform-theme-tailwind" {
   import type { FreeformReactTheme } from "@solspace/freeform-react";
   export const tailwindTheme: FreeformReactTheme;
   export const tailwindDarkTheme: FreeformReactTheme;
   export const tailwindLightTheme: FreeformReactTheme;
 }
 
-declare module "@solspace/freeform-react-theme-bootstrap" {
+declare module "@solspace/freeform-theme-bootstrap" {
   import type { FreeformReactTheme } from "@solspace/freeform-react";
   export const bootstrapTheme: FreeformReactTheme;
   export const bootstrapDarkTheme: FreeformReactTheme;

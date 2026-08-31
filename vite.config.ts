@@ -13,12 +13,12 @@ const frontendRoot = path.resolve(
 
 const optionalThemePackages = [
   {
-    name: "@solspace/freeform-react-theme-tailwind",
-    subdir: "themes/react-tailwind",
+    name: "@solspace/freeform-theme-tailwind",
+    subdir: "themes/tailwind",
   },
   {
-    name: "@solspace/freeform-react-theme-bootstrap",
-    subdir: "themes/react-bootstrap",
+    name: "@solspace/freeform-theme-bootstrap",
+    subdir: "themes/bootstrap",
   },
 ] as const;
 
@@ -59,10 +59,10 @@ function localThemeAliases(pkgs: typeof optionalThemePackages[number][]) {
       },
     ];
 
-    if (pkg.name === "@solspace/freeform-react-theme-bootstrap") {
+    if (pkg.name === "@solspace/freeform-theme-bootstrap") {
       entries.unshift({
-        find: "@solspace/freeform-react-theme-bootstrap/styles.css",
-        replacement: localAlias("themes/react-bootstrap", "src/styles.css"),
+        find: "@solspace/freeform-theme-bootstrap/styles.css",
+        replacement: localAlias("themes/bootstrap", "src/styles.css"),
       });
     }
 
@@ -104,12 +104,12 @@ export default defineConfig(({ mode }) => {
   const alias = useLocalPackages
     ? [
         {
-          find: "@solspace/freeform-react-theme-default/styles.css",
-          replacement: localAlias("themes/react-default", "src/styles.css"),
+          find: "@solspace/freeform-theme-default/styles.css",
+          replacement: localAlias("themes/default", "src/styles.css"),
         },
         {
-          find: "@solspace/freeform-react-theme-bootstrap/styles.css",
-          replacement: localAlias("themes/react-bootstrap", "src/styles.css"),
+          find: "@solspace/freeform-theme-bootstrap/styles.css",
+          replacement: localAlias("themes/bootstrap", "src/styles.css"),
         },
         {
           find: "@solspace/freeform-core",
@@ -124,8 +124,8 @@ export default defineConfig(({ mode }) => {
           replacement: localAlias("extensions"),
         },
         {
-          find: "@solspace/freeform-react-theme-default",
-          replacement: path.join(frontendRoot, "themes/react-default"),
+          find: "@solspace/freeform-theme-default",
+          replacement: path.join(frontendRoot, "themes/default"),
         },
         ...localThemeAliases([...optionalThemePackages]),
       ]
@@ -137,7 +137,7 @@ export default defineConfig(({ mode }) => {
           "@solspace/freeform-core",
           "@solspace/freeform-react",
           "@solspace/freeform-extensions",
-          "@solspace/freeform-react-theme-default",
+          "@solspace/freeform-theme-default",
           ...optionalThemePackages.map((pkg) => pkg.name),
         ]
       : []),

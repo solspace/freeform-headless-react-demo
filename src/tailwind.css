@@ -2,5 +2,6 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-@source "../../../freeform/packages/frontend/themes/react-tailwind/src";
-@source "../node_modules/@solspace/freeform-react-theme-tailwind";
+@source "../node_modules/@solspace/freeform-theme-tailwind";
+@source "../node_modules/@solspace/freeform-theme-tailwind/dist/**/*.js";
+@source "../../../freeform/packages/frontend/themes/tailwind/src";
