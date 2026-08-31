@@ -22,6 +22,10 @@ import {
   type FreeformReactTheme,
 } from "@solspace/freeform-react-theme-default";
 import {
+  bootstrapDarkTheme,
+  bootstrapTheme,
+} from "@solspace/freeform-react-theme-bootstrap";
+import {
   tailwindDarkTheme,
   tailwindTheme,
 } from "@solspace/freeform-react-theme-tailwind";
@@ -34,7 +38,7 @@ import { graphqlFetch } from "./graphqlFetch";
 type ApiMode = "rest" | "graphql";
 type ViewMode = "component" | "headless" | "manifest";
 type ColorScheme = "light" | "dark" | "system";
-type ThemeSkin = "default" | "tailwind";
+type ThemeSkin = "default" | "tailwind" | "bootstrap";
 
 type DraftCredentials = {
   draftToken: string | null;
@@ -385,6 +389,7 @@ function ComponentForm({
   draftToken,
   draftKey,
   fetchImpl,
+  previewDark,
 }: {
   handle: string;
   onSubmit: (response: SubmitResponse) => void;
@@ -392,9 +397,12 @@ function ComponentForm({
   draftToken: string | null;
   draftKey: string | null;
   fetchImpl?: typeof fetch;
+  previewDark?: boolean;
 }) {
   return (
-    <div className="panel">
+    <div
+      className={`panel${previewDark ? " panel--bootstrap-dark" : ""}`}
+    >
       {fetchImpl ? (
         <pre className="panel-meta" style={{ marginBottom: "1rem" }}>
           {`<Freeform
@@ -445,12 +453,24 @@ export function App() {
     }
     return null;
   });
-  const theme =
-    themeSkin === "tailwind"
-      ? colorScheme === "dark" || (colorScheme === "system" && prefersDark)
-        ? tailwindDarkTheme
-        : tailwindTheme
-      : defaultThemesByScheme[colorScheme];
+  const theme = useMemo(() => {
+    const useDark =
+      colorScheme === "dark" || (colorScheme === "system" && prefersDark);
+
+    if (themeSkin === "tailwind") {
+      return useDark ? tailwindDarkTheme : tailwindTheme;
+    }
+
+    if (themeSkin === "bootstrap") {
+      return useDark ? bootstrapDarkTheme : bootstrapTheme;
+    }
+
+    return defaultThemesByScheme[colorScheme];
+  }, [themeSkin, colorScheme, prefersDark]);
+  const bootstrapPreviewDark =
+    themeSkin === "bootstrap" &&
+    (colorScheme === "dark" ||
+      (colorScheme === "system" && prefersDark));
   const hasGraphqlToken = Boolean(import.meta.env.VITE_GRAPHQL_TOKEN?.trim());
   const transportFetch = apiMode === "graphql" ? graphqlFetch : undefined;
 
@@ -523,69 +543,73 @@ export function App() {
 
   return (
     <div className="app" data-theme={colorScheme}>
-      <header>
+      <header className="app-header">
         <div className="header-row">
-          <div className="header-row__copy">
-            <h1>
-              Freeform Headless React Demo
-              <span className="package-source">{packageSource}</span>
-            </h1>
-            <p>
-              {packageSource === "local" ? (
-                <>
-                  Using sibling Craft Freeform packages. Set{" "}
-                  <code>FREEFORM_PACKAGES=npm</code> (or{" "}
-                  <code>pnpm dev:npm</code>) to switch to npmjs.com.
-                </>
-              ) : (
-                <>
-                  Official <code>@solspace/freeform-*</code> packages from npm.
-                  Set <code>FREEFORM_PACKAGES=local</code> (or{" "}
-                  <code>pnpm dev:local</code>) to use the Craft checkout.
-                </>
-              )}{" "}
-              Choose <strong>REST</strong> or <strong>GraphQL</strong>, then try{" "}
-              <code>&lt;Freeform /&gt;</code>, <code>useFreeform()</code>, or
-              Manifest JSON.
-            </p>
-          </div>
-          <div
-            className="scheme-toggle"
-            role="group"
-            aria-label="Form theme"
-          >
-            {(["default", "tailwind"] as const).map((skin) => (
-              <button
-                key={skin}
-                type="button"
-                className={`scheme-toggle__btn ${themeSkin === skin ? "is-active" : ""}`}
-                onClick={() => setThemeSkin(skin)}
-              >
-                {skin === "default" ? "Default" : "Tailwind"}
-              </button>
-            ))}
-          </div>
-          <div
-            className="scheme-toggle"
-            role="group"
-            aria-label="Color scheme"
-          >
-            {(["light", "dark", "system"] as const).map((scheme) => (
-              <button
-                key={scheme}
-                type="button"
-                className={`scheme-toggle__btn ${colorScheme === scheme ? "is-active" : ""}`}
-                onClick={() => setColorScheme(scheme)}
-              >
-                {scheme === "light"
-                  ? "Light"
-                  : scheme === "dark"
-                    ? "Dark"
-                    : "System"}
-              </button>
-            ))}
+          <h1>
+            Freeform Headless React Demo
+            <span className="package-source">{packageSource}</span>
+          </h1>
+          <div className="header-row__controls">
+            <div
+              className="scheme-toggle"
+              role="group"
+              aria-label="Form theme"
+            >
+              {(["default", "tailwind", "bootstrap"] as const).map((skin) => (
+                <button
+                  key={skin}
+                  type="button"
+                  className={`scheme-toggle__btn ${themeSkin === skin ? "is-active" : ""}`}
+                  onClick={() => setThemeSkin(skin)}
+                >
+                  {skin === "default"
+                    ? "Default"
+                    : skin === "tailwind"
+                      ? "Tailwind"
+                      : "Bootstrap"}
+                </button>
+              ))}
+            </div>
+            <div
+              className="scheme-toggle"
+              role="group"
+              aria-label="Color scheme"
+            >
+              {(["light", "dark", "system"] as const).map((scheme) => (
+                <button
+                  key={scheme}
+                  type="button"
+                  className={`scheme-toggle__btn ${colorScheme === scheme ? "is-active" : ""}`}
+                  onClick={() => setColorScheme(scheme)}
+                >
+                  {scheme === "light"
+                    ? "Light"
+                    : scheme === "dark"
+                      ? "Dark"
+                      : "System"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+        <p className="header-lead">
+          {packageSource === "local" ? (
+            <>
+              Using sibling Craft Freeform packages. Set{" "}
+              <code>FREEFORM_PACKAGES=npm</code> (or <code>pnpm dev:npm</code>)
+              to switch to npmjs.com.
+            </>
+          ) : (
+            <>
+              Official <code>@solspace/freeform-*</code> packages from npm. Set{" "}
+              <code>FREEFORM_PACKAGES=local</code> (or <code>pnpm dev:local</code>
+              ) to use the Craft checkout.
+            </>
+          )}{" "}
+          Choose <strong>REST</strong> or <strong>GraphQL</strong>, then try{" "}
+          <code>&lt;Freeform /&gt;</code>, <code>useFreeform()</code>, or
+          Manifest JSON.
+        </p>
       </header>
 
       <section className="panel">
@@ -762,6 +786,7 @@ export function App() {
           draftToken={draft.draftToken}
           draftKey={draft.draftKey}
           fetchImpl={transportFetch}
+          previewDark={bootstrapPreviewDark}
         />
       ) : null}
 

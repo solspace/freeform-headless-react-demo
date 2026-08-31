@@ -18,3 +18,13 @@ declare module "@solspace/freeform-react-theme-tailwind" {
   export const tailwindDarkTheme: FreeformReactTheme;
   export const tailwindLightTheme: FreeformReactTheme;
 }
+
+declare module "@solspace/freeform-react-theme-bootstrap" {
+  import type { FreeformReactTheme } from "@solspace/freeform-react";
+  export const bootstrapTheme: FreeformReactTheme;
+  export const bootstrapDarkTheme: FreeformReactTheme;
+  export const bootstrapLightTheme: FreeformReactTheme;
+  export function createTheme(
+    overrides?: Partial<FreeformReactTheme>,
+  ): FreeformReactTheme;
+}

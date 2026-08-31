@@ -11,6 +11,17 @@ const frontendRoot = path.resolve(
   "../../freeform/packages/frontend",
 );
 
+const optionalThemePackages = [
+  {
+    name: "@solspace/freeform-react-theme-tailwind",
+    subdir: "themes/react-tailwind",
+  },
+  {
+    name: "@solspace/freeform-react-theme-bootstrap",
+    subdir: "themes/react-bootstrap",
+  },
+] as const;
+
 function readPackageSource(env: Record<string, string>): "local" | "npm" {
   const value = (
     process.env.FREEFORM_PACKAGES ||
@@ -39,6 +50,26 @@ function localAlias(subdir: string, file = "src/index.ts"): string {
   return path.join(frontendRoot, subdir, file);
 }
 
+function localThemeAliases(pkgs: typeof optionalThemePackages[number][]) {
+  return pkgs.flatMap((pkg) => {
+    const entries: Array<{ find: string; replacement: string }> = [
+      {
+        find: pkg.name,
+        replacement: localAlias(pkg.subdir),
+      },
+    ];
+
+    if (pkg.name === "@solspace/freeform-react-theme-bootstrap") {
+      entries.unshift({
+        find: "@solspace/freeform-react-theme-bootstrap/styles.css",
+        replacement: localAlias("themes/react-bootstrap", "src/styles.css"),
+      });
+    }
+
+    return entries;
+  });
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, rootDir, "");
   const craftTarget =
@@ -48,10 +79,13 @@ export default defineConfig(({ mode }) => {
   const requestedLocal = readPackageSource(env) === "local";
   const useLocalPackages = requestedLocal && localPackagesExist();
   const packageSource = useLocalPackages ? "local" : "npm";
-  const unpublishedTailwind =
-    !useLocalPackages &&
-    !nodeModulesHas("@solspace/freeform-react-theme-tailwind") &&
-    fs.existsSync(path.join(frontendRoot, "themes/react-tailwind/package.json"));
+
+  const unpublishedThemes = optionalThemePackages.filter(
+    (pkg) =>
+      !useLocalPackages &&
+      !nodeModulesHas(pkg.name) &&
+      fs.existsSync(path.join(frontendRoot, pkg.subdir, "package.json")),
+  );
 
   if (requestedLocal && !useLocalPackages) {
     console.warn(
@@ -59,9 +93,9 @@ export default defineConfig(({ mode }) => {
     );
   }
 
-  if (unpublishedTailwind) {
+  for (const pkg of unpublishedThemes) {
     console.warn(
-      "[freeform-demo] @solspace/freeform-react-theme-tailwind is not installed from npm yet; using the local Craft package.",
+      `[freeform-demo] ${pkg.name} is not installed from npm yet; using the local Craft package.`,
     );
   }
 
@@ -72,6 +106,10 @@ export default defineConfig(({ mode }) => {
         {
           find: "@solspace/freeform-react-theme-default/styles.css",
           replacement: localAlias("themes/react-default", "src/styles.css"),
+        },
+        {
+          find: "@solspace/freeform-react-theme-bootstrap/styles.css",
+          replacement: localAlias("themes/react-bootstrap", "src/styles.css"),
         },
         {
           find: "@solspace/freeform-core",
@@ -89,19 +127,9 @@ export default defineConfig(({ mode }) => {
           find: "@solspace/freeform-react-theme-default",
           replacement: path.join(frontendRoot, "themes/react-default"),
         },
-        {
-          find: "@solspace/freeform-react-theme-tailwind",
-          replacement: localAlias("themes/react-tailwind"),
-        },
+        ...localThemeAliases([...optionalThemePackages]),
       ]
-    : unpublishedTailwind
-      ? [
-          {
-            find: "@solspace/freeform-react-theme-tailwind",
-            replacement: localAlias("themes/react-tailwind"),
-          },
-        ]
-      : [];
+    : localThemeAliases(unpublishedThemes);
 
   const exclude = [
     ...(useLocalPackages
@@ -110,10 +138,11 @@ export default defineConfig(({ mode }) => {
           "@solspace/freeform-react",
           "@solspace/freeform-extensions",
           "@solspace/freeform-react-theme-default",
+          ...optionalThemePackages.map((pkg) => pkg.name),
         ]
       : []),
-    ...(useLocalPackages || unpublishedTailwind
-      ? ["@solspace/freeform-react-theme-tailwind"]
+    ...(unpublishedThemes.length && !useLocalPackages
+      ? unpublishedThemes.map((pkg) => pkg.name)
       : []),
   ];
 

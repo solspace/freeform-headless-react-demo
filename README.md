@@ -11,6 +11,7 @@ Official packages:
 | [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop, table, signature |
 | [`@solspace/freeform-react-theme-default`](https://www.npmjs.com/package/@solspace/freeform-react-theme-default) | Default light / dark theme |
 | [`@solspace/freeform-react-theme-tailwind`](https://www.npmjs.com/package/@solspace/freeform-react-theme-tailwind) | Official Tailwind starter (class maps, no CSS) |
+| [`@solspace/freeform-react-theme-bootstrap`](https://www.npmjs.com/package/@solspace/freeform-react-theme-bootstrap) | Official Bootstrap 5 starter (class maps, no CSS) |
 
 ## What you need
 
