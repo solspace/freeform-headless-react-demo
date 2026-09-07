@@ -120,8 +120,10 @@ Restart Vite after changing this. The header badge shows **npm** or **local**.
 
 | Command / env | Packages |
 | --- | --- |
-| `pnpm dev` or `pnpm dev:npm` | `@solspace/freeform-core`, `-react`, `-extensions` from npm; themes from `file:../../freeform/...` when that path exists |
-| `pnpm dev:local` | All packages from `../../freeform/packages/frontend` via Vite aliases |
+| Command / env | Packages |
+| --- | --- |
+| `pnpm dev` or `pnpm dev:npm` | All `@solspace/freeform-*` packages from npm (`^0.1.17`) |
+| `pnpm dev:local` | Opt-in: Vite aliases to a sibling `../../freeform/packages/frontend` checkout (for maintainers) |
 
 ```bash
 # .env
