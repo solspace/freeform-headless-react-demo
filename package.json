@@ -3,14 +3,10 @@
   "private": true,
   "version": "0.1.17",
   "type": "module",
-  "description": "Example React app using @solspace/freeform-* from npm or a local Craft Freeform checkout",
+  "description": "Example React app using @solspace/freeform-* from npm",
   "scripts": {
     "dev": "vite",
-    "dev:local": "FREEFORM_PACKAGES=local vite",
-    "dev:npm": "FREEFORM_PACKAGES=npm vite",
     "build": "vite build",
-    "build:local": "FREEFORM_PACKAGES=local vite build",
-    "build:npm": "FREEFORM_PACKAGES=npm vite build",
     "preview": "vite preview"
   },
   "dependencies": {

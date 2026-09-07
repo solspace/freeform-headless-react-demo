@@ -1,6 +1,6 @@
 # Freeform Headless React Demo
 
-Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms. This is the only React demo — switch package source with `FREEFORM_PACKAGES` (npm vs local Craft checkout).
+Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms using the published `@solspace/freeform-*` packages from npm.
 
 Official packages:
 
@@ -78,10 +78,6 @@ cp .env.example .env
 Edit `.env`:
 
 ```bash
-# npm (default) = packages from npmjs.com
-# local = sibling Craft Freeform at ../../freeform/packages/frontend
-FREEFORM_PACKAGES=npm
-
 # Craft site URL (Vite proxies /freeform and /actions here)
 CRAFT_PROXY_TARGET=https://your-site.example
 
@@ -95,7 +91,6 @@ VITE_GRAPHQL_TOKEN=your-craft-graphql-token
 
 | Variable | Purpose |
 | --- | --- |
-| `FREEFORM_PACKAGES` | `npm` (published packages) or `local` (Craft Freeform checkout) |
 | `CRAFT_PROXY_TARGET` | Your Craft / Freeform site URL |
 | `VITE_FREEFORM_HANDLE` | Default form handle shown when the app starts |
 | `VITE_GRAPHQL_PATH` | Craft GraphQL endpoint (default `/actions/graphql/api`) |
@@ -113,24 +108,6 @@ Open [http://localhost:3000](http://localhost:3000).
 How it connects: the React app calls `/freeform/...` on **localhost**. Vite proxies those requests to `CRAFT_PROXY_TARGET`, so CSRF cookies work on the same origin.
 
 Use `npm` or `yarn` if you prefer. This demo’s `package.json` pins `@solspace/freeform-*` from the registry.
-
-### Local Craft packages vs npm
-
-Restart Vite after changing this. The header badge shows **npm** or **local**.
-
-| Command / env | Packages |
-| --- | --- |
-| Command / env | Packages |
-| --- | --- |
-| `pnpm dev` or `pnpm dev:npm` | All `@solspace/freeform-*` packages from npm (`^0.1.17`) |
-| `pnpm dev:local` | Opt-in: Vite aliases to a sibling `../../freeform/packages/frontend` checkout (for maintainers) |
-
-```bash
-# .env
-FREEFORM_PACKAGES=local   # or npm
-```
-
-`local` is opt-in. Just having the sibling Freeform repo on disk does **not** switch you off npm.
 
 ## How to use a form in this app
 
@@ -201,15 +178,11 @@ When `/freeform` is proxied (or served) on the same host as your frontend, keep 
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Dev server (uses `FREEFORM_PACKAGES` from `.env`, default **npm**) |
-| `pnpm dev:npm` | Force **published** `@solspace/freeform-*` from npmjs.com |
-| `pnpm dev:local` | Force sibling Craft Freeform packages (`../../freeform/packages/frontend`) |
-| `pnpm build` | Production build (respects `FREEFORM_PACKAGES` from env) |
-| `pnpm build:npm` | Build against npm packages |
-| `pnpm build:local` | Build against local Freeform checkout |
+| `pnpm dev` | Dev server |
+| `pnpm build` | Production build |
 | `pnpm preview` | Preview the production build |
 
-Custom port: `PORT=3001 npm run dev`
+Custom port: `PORT=3001 pnpm dev`
 
 ## Next.js
 
