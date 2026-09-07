@@ -23,19 +23,20 @@ const optionalThemePackages = [
 ] as const;
 
 function readPackageSource(env: Record<string, string>): "local" | "npm" {
+  // `dev` branch defaults to the sibling Craft Freeform checkout.
   const value = (
     process.env.FREEFORM_PACKAGES ||
     env.FREEFORM_PACKAGES ||
-    "npm"
+    "local"
   )
     .trim()
     .toLowerCase();
 
-  if (value === "local" || value === "1" || value === "true") {
-    return "local";
+  if (value === "npm" || value === "0" || value === "false") {
+    return "npm";
   }
 
-  return "npm";
+  return "local";
 }
 
 function localPackagesExist(): boolean {

@@ -1,235 +1,31 @@
-# Freeform Headless React Demo
+# Freeform Headless React Demo (`dev` branch)
 
-Example **Vite + React** app that renders [Solspace Freeform](https://docs.solspace.com/craft/freeform/) forms. This is the only React demo — switch package source with `FREEFORM_PACKAGES` (npm vs local Craft checkout).
+**This branch develops against your local Craft Freeform checkout**, not npm.
 
-Official packages:
+Expected layout:
 
-| Package | Role |
-| --- | --- |
-| [`@solspace/freeform-core`](https://www.npmjs.com/package/@solspace/freeform-core) | Manifest, state, submit |
-| [`@solspace/freeform-react`](https://www.npmjs.com/package/@solspace/freeform-react) | `<Freeform />` and `useFreeform()` |
-| [`@solspace/freeform-extensions`](https://www.npmjs.com/package/@solspace/freeform-extensions) | Captchas, calculation, datetime, file drag & drop, table, signature |
-| [`@solspace/freeform-theme-default`](https://www.npmjs.com/package/@solspace/freeform-theme-default) | Default light / dark theme |
-| [`@solspace/freeform-theme-tailwind`](https://www.npmjs.com/package/@solspace/freeform-theme-tailwind) | Official Tailwind starter (class maps, no CSS) |
-| [`@solspace/freeform-theme-bootstrap`](https://www.npmjs.com/package/@solspace/freeform-theme-bootstrap) | Official Bootstrap 5 starter (class maps, no CSS) |
-
-## What you need
-
-Before running this app:
-
-1. A **Craft CMS** site with **Freeform** installed (version that includes the headless REST API)
-2. A Freeform form you want to display (you’ll use its **handle**, e.g. `contact`)
-3. **Node.js 20+**
-
-## 1. Enable headless Freeform (on your Craft site)
-
-This step is done in your **Craft CMS project**, not in this React demo repo.
-
-Headless must be turned on in Freeform **before** this app can load a form.
-
-1. Open your Craft site project (the CMS install — e.g. a DDEV project, not this Vite app).
-2. Edit (or create) the Freeform config file at:
-
-   ```text
-   your-craft-project/config/freeform.php
-   ```
-
-   Typical locations:
-
-   | Setup | Path |
-   | --- | --- |
-   | Standard Craft | `config/freeform.php` at the Craft project root |
-   | DDEV / local | same — e.g. `~/Sites/my-site/config/freeform.php` |
-
-3. Merge a `headless` section into that file (keep any other Freeform settings you already have). See the [Freeform Headless docs](https://docs.solspace.com/craft/freeform/v5/headless/getting-started/) for the full options:
-
-```php
-<?php
-// your-craft-project/config/freeform.php
-
-return [
-    'headless' => [
-        'enabled' => true,
-        'forms' => [
-            'contact' => [          // ← your Freeform form handle
-                'exposeManifest' => true,
-                'allowSubmit' => true,
-            ],
-        ],
-    ],
-];
+```text
+craft/plugins/
+  freeform/packages/frontend/   ← local @solspace/freeform-* sources
+  frontend-library/
+    freeform-headless-react-demo/
 ```
 
-Tips:
-
-- Replace `contact` with the form **handle** from the Freeform control panel (Forms → your form).
-- For public forms, enable a **captcha** in Freeform.
-- Keep Craft running (e.g. DDEV at `https://site.ddev.site`) — you will point `CRAFT_PROXY_TARGET` at that URL in step 2.
-
-## 2. Clone and configure this app
+## Quick start
 
 ```bash
-git clone https://github.com/solspace/freeform-headless-react-demo.git
-cd freeform-headless-react-demo
-
 cp .env.example .env
-```
-
-Edit `.env`:
-
-```bash
-# npm (default) = packages from npmjs.com
-# local = sibling Craft Freeform at ../../freeform/packages/frontend
-FREEFORM_PACKAGES=npm
-
-# Craft site URL (Vite proxies /freeform and /actions here)
-CRAFT_PROXY_TARGET=https://your-site.example
-
-# Form handle from Freeform (same as in step 1)
-VITE_FREEFORM_HANDLE=contact
-
-# Optional — GraphQL tab
-VITE_GRAPHQL_PATH=/actions/graphql/api
-VITE_GRAPHQL_TOKEN=your-craft-graphql-token
-```
-
-| Variable | Purpose |
-| --- | --- |
-| `FREEFORM_PACKAGES` | `npm` (published packages) or `local` (Craft Freeform checkout) |
-| `CRAFT_PROXY_TARGET` | Your Craft / Freeform site URL |
-| `VITE_FREEFORM_HANDLE` | Default form handle shown when the app starts |
-| `VITE_GRAPHQL_PATH` | Craft GraphQL endpoint (default `/actions/graphql/api`) |
-| `VITE_GRAPHQL_TOKEN` | Craft GraphQL schema token (needed for the GraphQL tab) |
-
-## 3. Install and run
-
-```bash
 pnpm install
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-How it connects: the React app calls `/freeform/...` on **localhost**. Vite proxies those requests to `CRAFT_PROXY_TARGET`, so CSRF cookies work on the same origin.
+`pnpm dev` always sets `FREEFORM_PACKAGES=local` and Vite aliases every `@solspace/freeform-*` import to `../../freeform/packages/frontend/...`.
 
-Use `npm` or `yarn` if you prefer. This demo’s `package.json` pins `@solspace/freeform-*` from the registry.
-
-### Local Craft packages vs npm
-
-Restart Vite after changing this. The header badge shows **npm** or **local**.
-
-| Command / env | Packages |
+| Branch | Packages |
 | --- | --- |
-| Command / env | Packages |
-| --- | --- |
-| `pnpm dev` or `pnpm dev:npm` | All `@solspace/freeform-*` packages from npm (`^0.1.17`) |
-| `pnpm dev:local` | Opt-in: Vite aliases to a sibling `../../freeform/packages/frontend` checkout (for maintainers) |
+| `main` | Published npm packages — public demo |
+| `dev` (this branch) | Sibling Freeform packages — local development |
 
-```bash
-# .env
-FREEFORM_PACKAGES=local   # or npm
-```
-
-`local` is opt-in. Just having the sibling Freeform repo on disk does **not** switch you off npm.
-
-## How to use a form in this app
-
-### Load your form
-
-1. Make sure the form is headless-enabled (step 1).
-2. In the app **Form settings**, enter the form handle → **Load form**.  
-   Or set `VITE_FREEFORM_HANDLE` in `.env` and restart `pnpm dev`.
-
-### Try the demo modes
-
-**1. Pick an API** (top tabs)
-
-| Tab | What it uses |
-| --- | --- |
-| **REST** | `/freeform` headless endpoints (recommended default) |
-| **GraphQL** | Craft GraphQL adapters via `fetch={graphqlFetch}` |
-
-**2. Pick a view** (second row)
-
-| Tab | What it shows |
-| --- | --- |
-| `<Freeform />` | Full form with the default theme |
-| `useFreeform()` | Headless hook — you own the markup |
-| Manifest JSON | Raw manifest (REST or GraphQL depending on the API tab) |
-
-**GraphQL:** create a Craft GraphQL schema with Freeform form read + submission create, enable your **site**, and paste a token into `VITE_GRAPHQL_TOKEN`. Pass the demo’s `graphqlFetch` helper as `fetch`:
-
-```tsx
-import { Freeform } from "@solspace/freeform-react";
-import { graphqlFetch } from "./graphqlFetch"; // see this repo
-
-<Freeform
-  handle="contact"
-  baseUrl={window.location.origin}
-  fetch={graphqlFetch}
-  extensions={recommendedExtensions}
-/>
-```
-
-JSON submits use GraphQL; multipart file uploads still go through REST.
-
-**Save & Continue:** if the form has Save enabled, click Save — the URL gets `?session-token=…&key=…`. Refresh or share that link to resume. See [React docs → Save & Continue Later](https://docs.solspace.com/craft/freeform/v5/headless/reactjs/#save--continue-later).
-
-**Advanced fields:** `recommendedExtensions` covers captchas, datetime, file drag & drop, calculation, **table**, and **signature**.
-
-### Use the same pattern in your own project
-
-```tsx
-import { Freeform } from "@solspace/freeform-react";
-import { recommendedExtensions } from "@solspace/freeform-extensions";
-import "@solspace/freeform-theme-default/styles.css";
-
-export function ContactForm() {
-  return (
-    <Freeform
-      handle="contact"
-      baseUrl={window.location.origin}
-      extensions={recommendedExtensions}
-    />
-  );
-}
-```
-
-When `/freeform` is proxied (or served) on the same host as your frontend, keep `baseUrl` as your app’s origin.
-
-## Scripts
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Dev server (uses `FREEFORM_PACKAGES` from `.env`, default **npm**) |
-| `pnpm dev:npm` | Force **published** `@solspace/freeform-*` from npmjs.com |
-| `pnpm dev:local` | Force sibling Craft Freeform packages (`../../freeform/packages/frontend`) |
-| `pnpm build` | Production build (respects `FREEFORM_PACKAGES` from env) |
-| `pnpm build:npm` | Build against npm packages |
-| `pnpm build:local` | Build against local Freeform checkout |
-| `pnpm preview` | Preview the production build |
-
-Custom port: `PORT=3001 npm run dev`
-
-## Next.js
-
-The same packages work in Next.js. Use a Client Component and rewrite `/freeform` to your Craft site (same idea as this Vite proxy). See Solspace Freeform → **Headless** docs.
-
-## Docs
-
-- [Solspace Freeform documentation](https://docs.solspace.com/craft/freeform/) → Headless
-- Packages on [npm](https://www.npmjs.com/org/solspace)
-
-## Troubleshooting
-
-| Issue | Fix |
-| --- | --- |
-| Form won’t load / 404 | Wrong handle, or headless not enabled for that form (step 1). |
-| CSRF / session errors | Keep using the Vite proxy; don’t call Craft from another origin without CORS + credentials. |
-| CORS errors | Prefer the proxy, or add `http://localhost:3000` to `headless.allowedOrigins`. |
-| Captcha / file upload missing | Enable those integrations in Freeform; this demo already loads `recommendedExtensions`. |
-| Save & Continue | Enable **Save** on the form’s Button Layout. After Save, this demo puts `session-token` + `key` in the URL — refresh to resume. |
-
-## License
-
-This demo is MIT. The Freeform Craft plugin is licensed separately — see [Solspace Freeform](https://docs.solspace.com/craft/freeform/).
+Point `CRAFT_PROXY_TARGET` at your Craft site. See `main` README for full Craft headless setup.
