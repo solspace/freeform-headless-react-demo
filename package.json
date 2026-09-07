@@ -1,7 +1,7 @@
 {
   "name": "@solspace/freeform-headless-react-demo",
   "private": true,
-  "version": "0.1.17",
+  "version": "0.1.19",
   "type": "module",
   "description": "React demo — local Craft Freeform packages (dev branch)",
   "scripts": {
