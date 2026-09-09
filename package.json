@@ -1,7 +1,7 @@
 {
   "name": "@solspace/freeform-headless-react-demo",
   "private": true,
-  "version": "0.1.19",
+  "version": "0.1.20",
   "type": "module",
   "description": "Example React app using @solspace/freeform-* from npm",
   "scripts": {
@@ -10,12 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solspace/freeform-core": "^0.1.19",
-    "@solspace/freeform-extensions": "^0.1.19",
-    "@solspace/freeform-react": "^0.1.19",
-    "@solspace/freeform-theme-bootstrap": "^0.1.19",
-    "@solspace/freeform-theme-default": "^0.1.19",
-    "@solspace/freeform-theme-tailwind": "^0.1.19",
+    "@solspace/freeform-core": "^0.1.20",
+    "@solspace/freeform-extensions": "^0.1.20",
+    "@solspace/freeform-react": "^0.1.20",
+    "@solspace/freeform-theme-bootstrap": "^0.1.20",
+    "@solspace/freeform-theme-default": "^0.1.20",
+    "@solspace/freeform-theme-tailwind": "^0.1.20",
     "bootstrap": "^5.3.7",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
