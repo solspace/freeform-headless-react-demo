@@ -608,7 +608,8 @@ header h1 {
   font-weight: 600;
 }
 
-.handle-form input {
+.handle-form input,
+.handle-form select {
   font: inherit;
   padding: 0.55rem 0.65rem;
   border-radius: 8px;

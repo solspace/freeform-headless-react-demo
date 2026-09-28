@@ -174,7 +174,9 @@ export default defineConfig(({ mode }) => {
               proxyRes.headers["set-cookie"] = cookies.map((cookie) =>
                 cookie
                   .replace(/;?\s*Domain=[^;]+/gi, "")
-                  .replace(/;?\s*Secure/gi, ""),
+                  .replace(/;?\s*Secure/gi, "")
+                  // SameSite=None requires Secure; demos run on http://localhost.
+                  .replace(/;?\s*SameSite=None/gi, "; SameSite=Lax"),
               );
             });
           },

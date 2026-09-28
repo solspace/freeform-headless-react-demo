@@ -1,5 +1,7 @@
 /** Craft GraphQL client for Freeform headless adapters. */
 
+import { resolveCraftBaseUrl, resolveGraphqlUrl } from "./craftUrl";
+
 const graphqlPath =
   import.meta.env.VITE_GRAPHQL_PATH?.trim() || "/actions/graphql/api";
 const graphqlToken = import.meta.env.VITE_GRAPHQL_TOKEN?.trim() || "";
@@ -22,7 +24,10 @@ export async function craftGraphql<T>(
     headers.Authorization = `Bearer ${graphqlToken}`;
   }
 
-  const response = await fetch(graphqlPath, {
+  const baseUrl = resolveCraftBaseUrl(import.meta.env.VITE_FREEFORM_BASE_URL);
+  const url = resolveGraphqlUrl(baseUrl, graphqlPath);
+
+  const response = await fetch(url, {
     method: "POST",
     headers,
     credentials: "include",

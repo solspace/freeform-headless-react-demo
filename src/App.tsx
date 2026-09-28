@@ -3,6 +3,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type ChangeEvent,
   type FormEvent,
 } from "react";
 import {
@@ -33,7 +34,9 @@ import {
   craftGraphql,
   HEADLESS_MANIFEST_QUERY,
 } from "./graphql";
-import { graphqlFetch } from "./graphqlFetch";
+import { graphqlFetch as rawGraphqlFetch } from "./graphqlFetch";
+import { withFakerResolvedFetch, resolveManifestFakerDefaults } from "./resolveFakerDefaults";
+import { resolveCraftBaseUrl } from "./craftUrl";
 
 type ApiMode = "rest" | "graphql";
 type ViewMode = "component" | "headless" | "manifest";
@@ -45,11 +48,30 @@ type DraftCredentials = {
   draftKey: string | null;
 };
 
-/** Same-origin — Vite proxies `/freeform` to Craft (see vite.config.ts). */
-const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+/** Same-origin proxy locally, or VITE_FREEFORM_BASE_URL on Vercel / other hosts. */
+const baseUrl = resolveCraftBaseUrl(
+  import.meta.env.VITE_FREEFORM_BASE_URL,
+);
+
+const demoFetch = withFakerResolvedFetch();
+const graphqlFetch = withFakerResolvedFetch(rawGraphqlFetch);
 
 const defaultHandle =
   import.meta.env.VITE_FREEFORM_HANDLE?.trim() || "contact";
+
+/** Forms exposed for headless on demo.solspace.com (config/freeform.php). */
+const DEMO_FORMS = [
+  { handle: "contact", label: "Contact" },
+  { handle: "jobApplication", label: "Job Application" },
+  { handle: "multiplePage", label: "Multiple Page" },
+  { handle: "newsletter", label: "Newsletter" },
+  { handle: "quote", label: "Get a Quote" },
+] as const;
+
+const DEMO_FORM_HANDLES: ReadonlySet<string> = new Set(
+  DEMO_FORMS.map((form) => form.handle),
+);
+const CUSTOM_HANDLE_VALUE = "__custom__";
 
 const packageSource =
   import.meta.env.VITE_FREEFORM_PACKAGES === "local" ? "local" : "npm";
@@ -134,7 +156,7 @@ function ManifestPanel({
   const [manifest, setManifest] = useState<FreeformManifest | null>(null);
 
   const client = useMemo(() => {
-    const next = createFreeformClient({ baseUrl });
+    const next = createFreeformClient({ baseUrl, fetch: demoFetch });
     for (const extension of demoExtensions) {
       next.extensions.register(extension);
     }
@@ -214,8 +236,11 @@ function GraphqlManifestPanel({
       const data = await craftGraphql<{
         freeformHeadlessManifest: FreeformManifest;
       }>(HEADLESS_MANIFEST_QUERY, { handle });
-      setManifest(data.freeformHeadlessManifest);
-      onLoaded(data.freeformHeadlessManifest);
+      const resolved = resolveManifestFakerDefaults(
+        data.freeformHeadlessManifest,
+      );
+      setManifest(resolved);
+      onLoaded(resolved);
     } catch (loadError) {
       setError(
         loadError instanceof Error
@@ -282,7 +307,7 @@ function HeadlessForm({
   const form = useFreeform({
     handle,
     baseUrl,
-    fetch: fetchImpl,
+    fetch: fetchImpl ?? demoFetch,
     extensions: demoExtensions,
     draftToken,
     draftKey,
@@ -452,7 +477,7 @@ function ComponentForm({
         <pre className="panel-meta" style={{ marginBottom: "1rem" }}>
           {`<Freeform
   handle="${handle}"
-  baseUrl={window.location.origin}
+  baseUrl={baseUrl}
   fetch={graphqlFetch}
   extensions={recommendedExtensions}
 />`}
@@ -462,7 +487,7 @@ function ComponentForm({
         key={`${fetchImpl ? "gql" : "rest"}:${handle}:${draftToken ?? ""}:${draftKey ?? ""}`}
         handle={handle}
         baseUrl={baseUrl}
-        fetch={fetchImpl}
+        fetch={fetchImpl ?? demoFetch}
         theme={theme}
         extensions={demoExtensions}
         draftToken={draftToken}
@@ -566,16 +591,34 @@ export function App() {
     }
   }, []);
 
-  function applyHandle(event: FormEvent) {
-    event.preventDefault();
-    const next = handleDraft.trim();
-    if (!next) {
+  function loadHandle(next: string) {
+    const trimmed = next.trim();
+    if (!trimmed) {
       return;
     }
-    setHandle(next);
+    setHandleDraft(trimmed);
+    setHandle(trimmed);
     setLastSubmit(null);
     setManifestInfo(null);
   }
+
+  function applyHandle(event: FormEvent) {
+    event.preventDefault();
+    loadHandle(handleDraft);
+  }
+
+  function onFormSelect(event: ChangeEvent<HTMLSelectElement>) {
+    const value = event.target.value;
+    if (value === CUSTOM_HANDLE_VALUE) {
+      setHandleDraft("");
+      return;
+    }
+    loadHandle(value);
+  }
+
+  const formSelectValue = DEMO_FORM_HANDLES.has(handleDraft)
+    ? handleDraft
+    : CUSTOM_HANDLE_VALUE;
 
   function switchApiMode(next: ApiMode) {
     if (next === "graphql" && !hasGraphqlToken) {
@@ -662,21 +705,41 @@ export function App() {
           <section className="panel panel--sidebar panel--controls">
             <h2 className="panel-title">Form settings</h2>
             <p className="panel-help">
-              Use any Freeform form handle that is exposed for headless (see
-              README). Default comes from <code>VITE_FREEFORM_HANDLE</code>.
+              Pick a demo form exposed for headless, or choose{" "}
+              <strong>Custom handle</strong> for any other Freeform handle.
+              Default comes from <code>VITE_FREEFORM_HANDLE</code>.
             </p>
             <form className="handle-form" onSubmit={applyHandle}>
               <label>
-                Form handle
-                <input
-                  value={handleDraft}
-                  onChange={(event) => setHandleDraft(event.target.value)}
-                  placeholder="contact"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
+                Form
+                <select
+                  value={formSelectValue}
+                  onChange={onFormSelect}
+                  aria-label="Form handle"
+                >
+                  {DEMO_FORMS.map((form) => (
+                    <option key={form.handle} value={form.handle}>
+                      {form.label} ({form.handle})
+                    </option>
+                  ))}
+                  <option value={CUSTOM_HANDLE_VALUE}>Custom handle…</option>
+                </select>
               </label>
-              <button type="submit">Load form</button>
+              {formSelectValue === CUSTOM_HANDLE_VALUE ? (
+                <>
+                  <label>
+                    Custom handle
+                    <input
+                      value={handleDraft}
+                      onChange={(event) => setHandleDraft(event.target.value)}
+                      placeholder="yourFormHandle"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  </label>
+                  <button type="submit">Load form</button>
+                </>
+              ) : null}
             </form>
             <p className="panel-meta">
               Active handle: <code>{handle}</code>
