@@ -134,6 +134,10 @@ Use `npm` or `yarn` if you prefer. This demo’s `package.json` pins `@solspace/
 | `useFreeform()` | Headless hook — you own the markup |
 | Manifest JSON | Raw manifest (REST or GraphQL depending on the API tab) |
 
+**3. Stage: Preview | Code**
+
+On the form stage (left), switch **Preview** or **Code** — each is full width, with a short flip when switching. **Code** shows copy-paste starters for `<Freeform />` and `useFreeform()`, highlighted for the current API transport and theme skin.
+
 **GraphQL:** create a Craft GraphQL schema with Freeform form read + submission create, enable your **site**, and paste a token into `VITE_GRAPHQL_TOKEN`. Pass the demo’s `graphqlFetch` helper as `fetch`:
 
 ```tsx

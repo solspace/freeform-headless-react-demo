@@ -37,11 +37,34 @@ import {
 import { graphqlFetch as rawGraphqlFetch } from "./graphqlFetch";
 import { withFakerResolvedFetch, resolveManifestFakerDefaults } from "./resolveFakerDefaults";
 import { resolveCraftBaseUrl } from "./craftUrl";
+import {
+  buildCodeSnippet,
+  displayCraftBaseUrl,
+  type CodePreviewSnippetKind,
+} from "./codePreview";
+import { highlightSnippet } from "./highlightSnippet";
+import { IconGithub, IconMoon, IconSun, IconSystem } from "./icons";
+import {
+  readStoredColorScheme,
+  readStoredThemeSkin,
+  writeStoredColorScheme,
+  writeStoredThemeSkin,
+} from "./themePrefs";
 
 type ApiMode = "rest" | "graphql";
 type ViewMode = "component" | "headless" | "manifest";
+type StageLayout = "preview" | "code";
 type ColorScheme = "light" | "dark" | "system";
 type ThemeSkin = "default" | "tailwind" | "bootstrap";
+
+const GITHUB_REPO =
+  "https://github.com/solspace/freeform-headless-react-demo";
+
+const schemeIcons = {
+  light: IconSun,
+  dark: IconMoon,
+  system: IconSystem,
+} as const;
 
 type DraftCredentials = {
   draftToken: string | null;
@@ -50,6 +73,11 @@ type DraftCredentials = {
 
 /** Same-origin proxy locally, or VITE_FREEFORM_BASE_URL on Vercel / other hosts. */
 const baseUrl = resolveCraftBaseUrl(
+  import.meta.env.VITE_FREEFORM_BASE_URL,
+);
+
+/** Craft URL shown in copy-paste snippets (never empty origin). */
+const snippetBaseUrl = displayCraftBaseUrl(
   import.meta.env.VITE_FREEFORM_BASE_URL,
 );
 
@@ -447,6 +475,90 @@ function HeadlessForm({
   );
 }
 
+function CodePreviewPanel({
+  handle,
+  apiMode,
+  themeSkin,
+}: {
+  handle: string;
+  apiMode: ApiMode;
+  themeSkin: ThemeSkin;
+}) {
+  const [kind, setKind] = useState<CodePreviewSnippetKind>("freeform");
+  const [copied, setCopied] = useState(false);
+  const [highlightedHtml, setHighlightedHtml] = useState<string>("");
+
+  const code = useMemo(
+    () =>
+      buildCodeSnippet(kind, {
+        handle,
+        apiMode,
+        themeSkin,
+        baseUrl: snippetBaseUrl,
+        framework: "react",
+      }),
+    [kind, handle, apiMode, themeSkin],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void highlightSnippet(code, "tsx").then((html) => {
+      if (!cancelled) setHighlightedHtml(html);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
+  const copy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }, [code]);
+
+  return (
+    <div className="code-preview">
+      <div className="code-preview__toolbar">
+        <div className="view-picker view-picker--compact" role="tablist" aria-label="Code snippet">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={kind === "freeform"}
+            className={`view-picker__tab ${kind === "freeform" ? "is-active" : ""}`}
+            onClick={() => setKind("freeform")}
+          >
+            {"<Freeform />"}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={kind === "useFreeform"}
+            className={`view-picker__tab ${kind === "useFreeform" ? "is-active" : ""}`}
+            onClick={() => setKind("useFreeform")}
+          >
+            useFreeform()
+          </button>
+        </div>
+        <button type="button" className="code-preview__copy" onClick={() => void copy()}>
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      {highlightedHtml ? (
+        <div
+          className="code-preview__shiki"
+          dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+        />
+      ) : (
+        <pre className="code-preview__pre">{code}</pre>
+      )}
+    </div>
+  );
+}
+
 function ComponentForm({
   handle,
   onSubmit,
@@ -468,21 +580,7 @@ function ComponentForm({
 }) {
   return (
     <div className={previewDark ? "panel--bootstrap-dark" : undefined}>
-      {!embedded ? (
-        <>
-          <h2 className="panel-title">Form preview</h2>
-        </>
-      ) : null}
-      {fetchImpl ? (
-        <pre className="panel-meta" style={{ marginBottom: "1rem" }}>
-          {`<Freeform
-  handle="${handle}"
-  baseUrl={baseUrl}
-  fetch={graphqlFetch}
-  extensions={recommendedExtensions}
-/>`}
-        </pre>
-      ) : null}
+      {!embedded ? <h2 className="panel-title">Form preview</h2> : null}
       <Freeform
         key={`${fetchImpl ? "gql" : "rest"}:${handle}:${draftToken ?? ""}:${draftKey ?? ""}`}
         handle={handle}
@@ -511,8 +609,13 @@ export function App() {
   const [handle, setHandle] = useState(defaultHandle);
   const [apiMode, setApiMode] = useState<ApiMode>("rest");
   const [mode, setMode] = useState<ViewMode>("component");
-  const [colorScheme, setColorScheme] = useState<ColorScheme>("system");
-  const [themeSkin, setThemeSkin] = useState<ThemeSkin>("default");
+  const [stageLayout, setStageLayout] = useState<StageLayout>("preview");
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(() =>
+    readStoredColorScheme("system"),
+  );
+  const [themeSkin, setThemeSkin] = useState<ThemeSkin>(() =>
+    readStoredThemeSkin("default"),
+  );
   const [prefersDark, setPrefersDark] = useState(false);
   const [lastSubmit, setLastSubmit] = useState<SubmitResponse | null>(null);
   const [manifestInfo, setManifestInfo] = useState<string | null>(null);
@@ -558,7 +661,12 @@ export function App() {
     } else {
       document.documentElement.dataset.theme = colorScheme;
     }
+    writeStoredColorScheme(colorScheme);
   }, [colorScheme]);
+
+  useEffect(() => {
+    writeStoredThemeSkin(themeSkin);
+  }, [themeSkin]);
 
   const handleSubmitResponse = useCallback((response: SubmitResponse) => {
     setLastSubmit(response);
@@ -668,25 +776,49 @@ export function App() {
               ))}
             </div>
             <div
-              className="scheme-toggle"
+              className="scheme-toggle scheme-toggle--icons"
               role="group"
               aria-label="Color scheme"
             >
-              {(["light", "dark", "system"] as const).map((scheme) => (
-                <button
-                  key={scheme}
-                  type="button"
-                  className={`scheme-toggle__btn ${colorScheme === scheme ? "is-active" : ""}`}
-                  onClick={() => setColorScheme(scheme)}
-                >
-                  {scheme === "light"
-                    ? "Light"
-                    : scheme === "dark"
-                      ? "Dark"
-                      : "System"}
-                </button>
-              ))}
+              {(["light", "dark", "system"] as const).map((scheme) => {
+                const Icon = schemeIcons[scheme];
+                return (
+                  <button
+                    key={scheme}
+                    type="button"
+                    className={`scheme-toggle__btn scheme-toggle__btn--icon ${colorScheme === scheme ? "is-active" : ""}`}
+                    aria-label={
+                      scheme === "light"
+                        ? "Light"
+                        : scheme === "dark"
+                          ? "Dark"
+                          : "System"
+                    }
+                    aria-pressed={colorScheme === scheme}
+                    title={
+                      scheme === "light"
+                        ? "Light"
+                        : scheme === "dark"
+                          ? "Dark"
+                          : "System"
+                    }
+                    onClick={() => setColorScheme(scheme)}
+                  >
+                    <Icon />
+                  </button>
+                );
+              })}
             </div>
+            <a
+              className="header-github"
+              href={GITHUB_REPO}
+              target="_blank"
+              rel="noreferrer"
+              title="View on GitHub"
+              aria-label="View on GitHub"
+            >
+              <IconGithub />
+            </a>
           </div>
         </div>
         <p className="header-lead">
@@ -884,65 +1016,111 @@ export function App() {
           </section>
         </aside>
 
-        <main className="demo-stage" aria-label="Form preview">
+        <main className="demo-stage" aria-label="Form stage">
           <div
-            className={`panel panel--stage${bootstrapPreviewDark && mode === "component" ? " panel--bootstrap-dark" : ""}`}
+            className={`panel panel--stage${bootstrapPreviewDark && mode === "component" && stageLayout === "preview" ? " panel--bootstrap-dark" : ""}`}
           >
-            <h2 className="panel-title">Form preview</h2>
-
-            {mode === "component" ? (
-              <ComponentForm
-                key={`${apiMode}:${handle}`}
-                embedded
-                handle={handle}
-                onSubmit={handleSubmitResponse}
-                theme={theme}
-                draftToken={draft.draftToken}
-                draftKey={draft.draftKey}
-                fetchImpl={transportFetch}
-                previewDark={bootstrapPreviewDark}
-              />
+            {mode !== "manifest" ? (
+              <div className="stage-header">
+                <div
+                  className="view-picker view-picker--compact"
+                  role="tablist"
+                  aria-label="Stage layout"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={stageLayout === "preview"}
+                    className={`view-picker__tab ${stageLayout === "preview" ? "is-active" : ""}`}
+                    onClick={() => setStageLayout("preview")}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={stageLayout === "code"}
+                    className={`view-picker__tab ${stageLayout === "code" ? "is-active" : ""}`}
+                    onClick={() => setStageLayout("code")}
+                  >
+                    Code
+                  </button>
+                </div>
+              </div>
             ) : null}
 
-            {mode === "headless" ? (
-              <HeadlessForm
-                key={`${apiMode}:${handle}`}
-                embedded
-                handle={handle}
-                onSubmit={handleSubmitResponse}
-                draftToken={draft.draftToken}
-                draftKey={draft.draftKey}
-                fetchImpl={transportFetch}
-              />
-            ) : null}
+            {mode === "manifest" ? (
+              <>
+                {apiMode === "rest" ? (
+                  <ManifestPanel
+                    key={`rest:${handle}`}
+                    embedded
+                    handle={handle}
+                    onLoaded={(manifest) =>
+                      setManifestInfo(
+                        `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · REST`,
+                      )
+                    }
+                  />
+                ) : (
+                  <GraphqlManifestPanel
+                    key={`gql:${handle}`}
+                    embedded
+                    handle={handle}
+                    onLoaded={(manifest) =>
+                      setManifestInfo(
+                        `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · GraphQL`,
+                      )
+                    }
+                  />
+                )}
+              </>
+            ) : (
+              <div
+                className={`stage-flip ${stageLayout === "code" ? "is-code" : "is-preview"}`}
+                key={stageLayout}
+              >
+                {stageLayout === "preview" ? (
+                  <div className="stage-flip__face">
+                    {mode === "component" ? (
+                      <ComponentForm
+                        key={`${apiMode}:${handle}`}
+                        embedded
+                        handle={handle}
+                        onSubmit={handleSubmitResponse}
+                        theme={theme}
+                        draftToken={draft.draftToken}
+                        draftKey={draft.draftKey}
+                        fetchImpl={transportFetch}
+                        previewDark={bootstrapPreviewDark}
+                      />
+                    ) : null}
 
-            {mode === "manifest" && apiMode === "rest" ? (
-              <ManifestPanel
-                key={`rest:${handle}`}
-                embedded
-                handle={handle}
-                onLoaded={(manifest) =>
-                  setManifestInfo(
-                    `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · REST`,
-                  )
-                }
-              />
-            ) : null}
+                    {mode === "headless" ? (
+                      <HeadlessForm
+                        key={`${apiMode}:${handle}`}
+                        embedded
+                        handle={handle}
+                        onSubmit={handleSubmitResponse}
+                        draftToken={draft.draftToken}
+                        draftKey={draft.draftKey}
+                        fetchImpl={transportFetch}
+                      />
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="stage-flip__face">
+                    <CodePreviewPanel
+                      handle={handle}
+                      apiMode={apiMode}
+                      themeSkin={themeSkin}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-            {mode === "manifest" && apiMode === "graphql" ? (
-              <GraphqlManifestPanel
-                key={`gql:${handle}`}
-                embedded
-                handle={handle}
-                onLoaded={(manifest) =>
-                  setManifestInfo(
-                    `${manifest.form.handle} (${Object.keys(manifest.fields).length} fields) · GraphQL`,
-                  )
-                }
-              />
-            ) : null}
-
-            {lastSubmit ? (
+            {lastSubmit && stageLayout === "preview" ? (
               <SubmitFeedback lastSubmit={lastSubmit} apiMode={apiMode} />
             ) : null}
           </div>
