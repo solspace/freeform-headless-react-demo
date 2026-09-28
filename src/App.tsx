@@ -633,9 +633,18 @@ export function App() {
     <div className="app" data-theme={colorScheme}>
       <header className="app-header">
         <div className="header-row">
-          <h1>
-            Freeform Headless React Demo
-            <span className="package-source">{packageSource}</span>
+          <h1 className="header-brand">
+            <img
+              className="header-brand__icon"
+              src="/solspace-icon.png"
+              alt=""
+              width={32}
+              height={32}
+            />
+            <span>
+              Freeform Headless React Demo
+              <span className="package-source">{packageSource}</span>
+            </span>
           </h1>
           <div className="header-row__controls">
             <div

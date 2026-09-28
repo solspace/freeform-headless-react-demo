@@ -231,10 +231,21 @@ body {
   width: 100%;
 }
 
-.header-row h1 {
+.header-row h1,
+.header-brand {
   margin: 0;
   flex: 1 1 auto;
   min-width: min(100%, 16rem);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.header-brand__icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
 }
 
 .header-row__controls {
