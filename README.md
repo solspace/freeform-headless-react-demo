@@ -196,7 +196,6 @@ The same packages work in Next.js. Use a Client Component and rewrite `/freeform
 
 - [Solspace Freeform documentation](https://docs.solspace.com/craft/freeform/) → Headless
 - Packages on [npm](https://www.npmjs.com/org/solspace)
-- [CLOUDFLARE.md](./CLOUDFLARE.md) — `demo.solspace.com/freeform-headless/react/` path proxy setup
 
 ## Troubleshooting
 
