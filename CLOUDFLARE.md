@@ -3,14 +3,15 @@
 **Audience:** whoever manages Cloudflare for `demo.solspace.com`  
 **Goal:** Serve the three Vercel SPAs under path prefixes while Craft stays on the same hostname.
 
-| Public URL | Backend (Vercel) |
+| Public URL | Backend |
 | --- | --- |
+| `https://demo.solspace.com/freeform-headless` | **Craft** landing page (links to the three demos) |
 | `https://demo.solspace.com/freeform-headless/react/` | React demo Vercel deployment |
 | `https://demo.solspace.com/freeform-headless/vue/` | Vue demo Vercel deployment |
 | `https://demo.solspace.com/freeform-headless/nuxt/` | Nuxt demo Vercel deployment |
 | Everything else (`/`, `/admin`, `/freeform`, …) | Existing Craft origin (Arcustech) |
 
-The apps are already built with these public bases. The Worker **must strip** the `/freeform-headless/{react\|vue\|nuxt}` prefix before forwarding to Vercel (browser asks for `/freeform-headless/react/assets/…`; Vercel files live at `/assets/…`).
+The Worker **must strip** the `/freeform-headless/{react\|vue\|nuxt}` prefix before forwarding to Vercel. Do **not** proxy bare `/freeform-headless` — that page is served by Craft.
 
 ---
 
