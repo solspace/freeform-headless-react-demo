@@ -744,7 +744,7 @@ export function App() {
           <h1 className="header-brand">
             <img
               className="header-brand__icon"
-              src="/solspace-icon.png"
+              src={`${import.meta.env.BASE_URL}solspace-icon.png`}
               alt=""
               width={32}
               height={32}

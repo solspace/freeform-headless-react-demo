@@ -101,6 +101,22 @@ export default defineConfig(({ mode }) => {
 
   console.warn(`[freeform-demo] packages: ${packageSource}`);
 
+  /** Public path behind Cloudflare: demo.solspace.com/freeform-headless/react/ */
+  const baseFromEnv = (
+    env.VITE_BASE_PATH ||
+    process.env.VITE_BASE_PATH ||
+    ""
+  ).trim();
+  const base = baseFromEnv
+    ? baseFromEnv.endsWith("/")
+      ? baseFromEnv
+      : `${baseFromEnv}/`
+    : mode === "production"
+      ? "/freeform-headless/react/"
+      : "/";
+
+  console.warn(`[freeform-demo] base: ${base}`);
+
   const alias = useLocalPackages
     ? [
         {
@@ -147,6 +163,7 @@ export default defineConfig(({ mode }) => {
   ];
 
   return {
+    base,
     plugins: [react(), tailwindcss()],
     define: {
       "import.meta.env.VITE_FREEFORM_PACKAGES": JSON.stringify(packageSource),
