@@ -170,6 +170,23 @@ export default defineConfig(({ mode }) => {
     },
     resolve: alias.length ? { alias } : undefined,
     optimizeDeps: exclude.length ? { exclude } : undefined,
+    build: {
+      cssCodeSplit: true,
+      modulePreload: { polyfill: false },
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (
+              id.includes("node_modules/shiki") ||
+              id.includes("node_modules/@shikijs")
+            ) {
+              return "shiki";
+            }
+            return undefined;
+          },
+        },
+      },
+    },
     server: {
       port: Number(env.PORT || process.env.PORT || 3000),
       strictPort: true,
