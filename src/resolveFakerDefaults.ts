@@ -60,6 +60,11 @@ function callFaker(method: string, args: unknown[]): string {
       return faker.lorem.paragraph();
     case "paragraph":
       return faker.lorem.paragraph();
+    case "paragraphs": {
+      // Keep demos readable — default to 2 short paragraphs (not Faker’s heavy 3).
+      const count = typeof args[0] === "number" ? Math.max(1, args[0]) : 2;
+      return faker.lorem.paragraphs(count, "\n\n");
+    }
     case "word":
       return faker.lorem.word();
     case "words": {
