@@ -5,3 +5,5 @@
 @source "../node_modules/@solspace/freeform-theme-tailwind";
 @source "../node_modules/@solspace/freeform-theme-tailwind/dist/**/*.js";
 @source "../../../freeform/packages/frontend/themes/tailwind/src";
+/* Local package field renderers (select chevron helpers, etc.) */
+@source "../../../freeform/packages/frontend/react/src";

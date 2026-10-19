@@ -46,6 +46,7 @@ import {
   writeStoredColorScheme,
   writeStoredThemeSkin,
 } from "./themePrefs";
+import { useThemeCss } from "./useThemeCss";
 
 const CodePreviewPanel = lazy(() => import("./CodePreviewPanel"));
 
@@ -525,6 +526,7 @@ export function App() {
   const [themeSkin, setThemeSkin] = useState<ThemeSkin>(() =>
     readStoredThemeSkin("default"),
   );
+  useThemeCss(themeSkin);
   const [prefersDark, setPrefersDark] = useState(false);
   const [lastSubmit, setLastSubmit] = useState<SubmitResponse | null>(null);
   const [manifestInfo, setManifestInfo] = useState<string | null>(null);

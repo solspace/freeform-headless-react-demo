@@ -13,6 +13,11 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+declare module "*.css?inline" {
+  const css: string;
+  export default css;
+}
+
 declare module "@solspace/freeform-theme-tailwind" {
   import type { FreeformReactTheme } from "@solspace/freeform-react";
   export const tailwindTheme: FreeformReactTheme;
